@@ -4,19 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Evaluation;
+using System.Diagnostics;
 
 namespace PSXBuilder
 {
     class Program
     {
-        enum Settings
+        public enum Settings
         {
             PSXBuildMachine,
             PSXBuildMachineUsername,
             PSXBuildMachinePassword,
             PSToolsPath
         }
-   
+
         static void Main(string[] args)
         {
             Console.WriteLine("PSXBuilder {0}", Stringify(args));
@@ -24,18 +25,30 @@ namespace PSXBuilder
             bool displayHelp = true;
             if(args.Length > 0)
             {
-                if(args[0] == "-b")
+                /////////////////////////////////////////////
+                /// -b build
+                /////////////////////////////////////////////
+                if (args[0] == "-b")
                 {
                     displayHelp = false;
                 }
+                /////////////////////////////////////////////
+                /// -r rebuild
+                /////////////////////////////////////////////
                 else if (args[0] == "-r")
                 {
                     displayHelp = false;
                 }
+                /////////////////////////////////////////////
+                /// -c clean
+                /////////////////////////////////////////////
                 else if (args[0] == "-c")
                 {
                     displayHelp = false;
                 }
+                /////////////////////////////////////////////
+                /// -s builder setup
+                /////////////////////////////////////////////
                 else if (args[0] == "-s")
                 {
                     var settings = Enum.GetValues(typeof(Settings)) as Settings[];
@@ -49,6 +62,9 @@ namespace PSXBuilder
                         displayHelp = false;
                     }
                 }
+                /////////////////////////////////////////////
+                /// -d displays builder settings
+                /////////////////////////////////////////////
                 else if (args[0] == "-d")
                 {
                     var settings = Enum.GetValues(typeof(Settings)) as Settings[];
@@ -57,6 +73,14 @@ namespace PSXBuilder
                         var settingsName = settings[i].ToString();
                         Console.WriteLine("\t{0}: {1}", settingsName, Properties.Settings.Default[settingsName]);
                     }
+                    displayHelp = false;
+                }
+                /////////////////////////////////////////////
+                /// -t build machine connection test
+                /////////////////////////////////////////////
+                else if (args[0] == "-t")
+                {
+                    PSTools.Exec("cmd /c systeminfo");
                     displayHelp = false;
                 }
             }
@@ -69,21 +93,23 @@ namespace PSXBuilder
 
         static void DisplayHelp()
         {
-            Console.WriteLine("\t-h\tDisplay help.");
+            Console.WriteLine("\t-h\tdisplays help");
             Console.WriteLine("");
             Console.WriteLine("\t-b\t<ProjectFile>");
-            Console.WriteLine("\t\tBuild project.");
+            Console.WriteLine("\t\tbuild project");
             Console.WriteLine("");
             Console.WriteLine("\t-r\t<ProjectFile>");
-            Console.WriteLine("\t\tRebuild project.");
+            Console.WriteLine("\t\trebuild project");
             Console.WriteLine("");
             Console.WriteLine("\t-c\t<ProjectFile>");
-            Console.WriteLine("\t\tClean project.");
+            Console.WriteLine("\t\tclean project");
             Console.WriteLine("");
             Console.WriteLine("\t-s\t{0}", GetSettingsAsArguments());
-            Console.WriteLine("\t\tSetup build settings.");
+            Console.WriteLine("\t\tBuilder setup");
             Console.WriteLine("");
-            Console.WriteLine("\t-d\tDisplay build settings.");
+            Console.WriteLine("\t-d\tdisplays builder settings");
+            Console.WriteLine("");
+            Console.WriteLine("\t-t\tbuild machine connection test");
             Console.WriteLine("");
         }
 
