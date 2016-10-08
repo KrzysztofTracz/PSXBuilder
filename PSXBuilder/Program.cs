@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.Evaluation;
-using System.Diagnostics;
 
 namespace PSXBuilder
 {
@@ -25,63 +20,33 @@ namespace PSXBuilder
             bool displayHelp = true;
             if(args.Length > 0)
             {
-                /////////////////////////////////////////////
-                /// -b build
-                /////////////////////////////////////////////
-                if (args[0] == "-b")
+                var specifier = args[0];
+                if (specifier == "-b")
                 {
-                    displayHelp = false;
+                    displayHelp = !Build(args);
                 }
-                /////////////////////////////////////////////
-                /// -r rebuild
-                /////////////////////////////////////////////
-                else if (args[0] == "-r")
+                else if (specifier == "-r")
                 {
-                    displayHelp = false;
-                }
-                /////////////////////////////////////////////
-                /// -c clean
-                /////////////////////////////////////////////
-                else if (args[0] == "-c")
-                {
-                    displayHelp = false;
-                }
-                /////////////////////////////////////////////
-                /// -s builder setup
-                /////////////////////////////////////////////
-                else if (args[0] == "-s")
-                {
-                    var settings = Enum.GetValues(typeof(Settings)) as Settings[];
-                    if (args.Length == settings.Length + 1)
+                    if(Clean(args))
                     {
-                        for(int i=0; i< settings.Length; i++)
-                        {
-                            Properties.Settings.Default[settings[i].ToString()] = args[i + 1];
-                        }
-                        Properties.Settings.Default.Save();           
-                        displayHelp = false;
+                        displayHelp = !Build(args);
                     }
                 }
-                /////////////////////////////////////////////
-                /// -d displays builder settings
-                /////////////////////////////////////////////
-                else if (args[0] == "-d")
+                else if (specifier == "-c")
                 {
-                    var settings = Enum.GetValues(typeof(Settings)) as Settings[];
-                    for (int i = 0; i < settings.Length; i++)
-                    {
-                        var settingsName = settings[i].ToString();
-                        Console.WriteLine("\t{0}: {1}", settingsName, Properties.Settings.Default[settingsName]);
-                    }
-                    displayHelp = false;
+                    displayHelp = !Clean(args);
                 }
-                /////////////////////////////////////////////
-                /// -t build machine connection test
-                /////////////////////////////////////////////
-                else if (args[0] == "-t")
+                else if (specifier == "-s")
                 {
-                    PSTools.Exec("cmd /c systeminfo");
-                    displayHelp = false;
+                    displayHelp = !Setup(args);
+                }
+                else if (specifier == "-d")
+                {
+                    displayHelp = !DisplaySettings();
+                }
+                else if (specifier == "-t")
+                {                   
+                    displayHelp = !Test();
                 }
             }
            
@@ -95,7 +60,7 @@ namespace PSXBuilder
         {
             Console.WriteLine("\t-h\tdisplays help");
             Console.WriteLine("");
-            Console.WriteLine("\t-b\t<ProjectFile>");
+            Console.WriteLine("\t-b\t<ProjectFile> <configuration> <toolsVersion>");
             Console.WriteLine("\t\tbuild project");
             Console.WriteLine("");
             Console.WriteLine("\t-r\t<ProjectFile>");
@@ -111,6 +76,64 @@ namespace PSXBuilder
             Console.WriteLine("");
             Console.WriteLine("\t-t\tbuild machine connection test");
             Console.WriteLine("");
+        }
+
+        static bool Test()
+        {
+            PSTools.Exec("cmd /c systeminfo");
+            return true;
+        }
+
+        static bool DisplaySettings()
+        {
+            var settings = Enum.GetValues(typeof(Settings)) as Settings[];
+            for (int i = 0; i < settings.Length; i++)
+            {
+                var settingsName = settings[i].ToString();
+                Console.WriteLine("\t{0}: {1}", settingsName, Properties.Settings.Default[settingsName]);
+            }
+            return true;
+        }
+
+        static bool Setup(String[] args)
+        {
+            bool result = false;
+
+            var settings = Enum.GetValues(typeof(Settings)) as Settings[];
+            if (args.Length == settings.Length + 1)
+            {
+                for (int i = 0; i < settings.Length; i++)
+                {
+                    Properties.Settings.Default[settings[i].ToString()] = args[i + 1];
+                }
+                Properties.Settings.Default.Save();
+                result = true;
+            }
+
+            return result;
+        }
+
+        static bool Build(String[] args)
+        {
+            bool result = false;
+
+            if (args.Length == 4)
+            {
+                var project = new PSXProject();
+                if (project.Load(args[1], args[2], args[3]))
+                {
+                    result = true;
+                }
+            }
+
+            return result;
+        }
+
+        static bool Clean(String[] args)
+        {
+            bool result = false;
+
+            return result;
         }
 
         static String Stringify(params String[] args)
