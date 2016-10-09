@@ -73,7 +73,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="PSTools.cs" />
     <Compile Include="PSXProject.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
@@ -100,6 +99,10 @@
     <ProjectReference Include="..\ApplicationFramework\ApplicationFramework.csproj">
       <Project>{c8adcd1b-d1ac-4ecb-b99a-e07e98ec31d7}</Project>
       <Name>ApplicationFramework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Communictaion\CommunicationFramework.csproj">
+      <Project>{2d36f100-e177-4ab8-9116-ba03732af396}</Project>
+      <Name>CommunicationFramework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

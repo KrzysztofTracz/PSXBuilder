@@ -39,7 +39,7 @@ namespace ApplicationFramework
 
         public void WriteLineSeparator()
         {
-            WriteLine(">-------------------------<");
+            WriteLine("--------------");
         }
 
         public void PushTab()

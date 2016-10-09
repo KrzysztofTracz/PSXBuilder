@@ -9,18 +9,16 @@ namespace PSXBuilder
     {
         public enum Settings
         {
-            PSXBuildMachine,
-            PSXBuildMachineUsername,
-            PSXBuildMachinePassword,
-            PSToolsPath
+            PSXBuildMachineAddress,
+            PSXSDKPath
         }
 
-        static void Main(String[] args)
+        static int Main(String[] args)
         {
             var application = new Application("PSXBuilder");
-            application.Start(args);
+            var result = application.Start(args);
 
-            return;
+            return result ? 0 : -1;
 
             var message = "no elo!";
 

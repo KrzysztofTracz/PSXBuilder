@@ -20,8 +20,10 @@ namespace ApplicationFramework
             Console = new Console();
         }
 
-        public void Start(String[] arguments)
+        public bool Start(String[] arguments)
         {
+            bool result = true;
+
             Console.WriteLine("{0} {1}", Name, ConcatArguments(" ", arguments));
             Console.WriteLineSeparator();
 
@@ -31,6 +33,7 @@ namespace ApplicationFramework
             {
                 var specifier = arguments[0];
                 var programs  = Programs.Values;
+
                 foreach (var program in programs)
                 {
                     if(program.Specifier == specifier)
@@ -38,7 +41,7 @@ namespace ApplicationFramework
                         if(program.Arguments.Length == arguments.Length - 1)
                         {
                             displayHelp = false;
-                            program.Start(GetProgramArguments(arguments));
+                            result = program.Start(GetProgramArguments(arguments));
                         }
                         break;
                     }
@@ -49,6 +52,8 @@ namespace ApplicationFramework
             {
                 DisplayHelp();
             }
+
+            return result;
         }
 
         public void DisplayHelp()

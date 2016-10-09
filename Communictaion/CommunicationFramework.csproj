@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4282529A-F2FD-4FB5-A90F-63B30A2F05DF}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{2D36F100-E177-4AB8-9116-BA03732AF396}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PSXBuildService</RootNamespace>
-    <AssemblyName>PSXBuildService</AssemblyName>
+    <RootNamespace>CommunicationFramework</RootNamespace>
+    <AssemblyName>CommunicationFramework</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -41,19 +39,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="ByteArrayReader.cs" />
+    <Compile Include="ByteArrayWriter.cs" />
+    <Compile Include="Client.cs" />
+    <Compile Include="Device.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="MessageLibrary.cs" />
+    <Compile Include="Messages\GetRootDirectoryMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ApplicationFramework\ApplicationFramework.csproj">
-      <Project>{c8adcd1b-d1ac-4ecb-b99a-e07e98ec31d7}</Project>
-      <Name>ApplicationFramework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Communictaion\CommunicationFramework.csproj">
-      <Project>{2d36f100-e177-4ab8-9116-ba03732af396}</Project>
-      <Name>CommunicationFramework</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

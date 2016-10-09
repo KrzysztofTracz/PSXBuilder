@@ -2,16 +2,10 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PSXBuilder.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="PSXBuildMachine" Type="System.String" Scope="User">
+    <Setting Name="PSXBuildMachineAddress" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="PSXBuildMachineUsername" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="PSXBuildMachinePassword" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="PSToolsPath" Type="System.String" Scope="User">
+    <Setting Name="PSXSDKPath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

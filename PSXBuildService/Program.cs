@@ -35,7 +35,7 @@ namespace PSXBuildService
 
                     NetworkStream stream = client.GetStream();
                     int i;
-
+                                        
                     while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
                     {
                         // Translate data bytes to a ASCII string.

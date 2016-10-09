@@ -9,7 +9,7 @@ namespace PSXBuilder
     {
         public override bool Start(params String[] arguments)
         {
-            PSTools.CMD("systeminfo", false);
+            //PSTools.CMD("systeminfo", false);
             return true;
         }
 

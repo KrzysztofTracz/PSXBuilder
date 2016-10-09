@@ -26,48 +26,24 @@ namespace PSXBuilder.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string PSXBuildMachine {
+        public string PSXBuildMachineAddress {
             get {
-                return ((string)(this["PSXBuildMachine"]));
+                return ((string)(this["PSXBuildMachineAddress"]));
             }
             set {
-                this["PSXBuildMachine"] = value;
+                this["PSXBuildMachineAddress"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string PSXBuildMachineUsername {
+        public string PSXSDKPath {
             get {
-                return ((string)(this["PSXBuildMachineUsername"]));
+                return ((string)(this["PSXSDKPath"]));
             }
             set {
-                this["PSXBuildMachineUsername"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string PSXBuildMachinePassword {
-            get {
-                return ((string)(this["PSXBuildMachinePassword"]));
-            }
-            set {
-                this["PSXBuildMachinePassword"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string PSToolsPath {
-            get {
-                return ((string)(this["PSToolsPath"]));
-            }
-            set {
-                this["PSToolsPath"] = value;
+                this["PSXSDKPath"] = value;
             }
         }
     }

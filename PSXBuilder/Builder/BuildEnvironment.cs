@@ -39,8 +39,8 @@ namespace PSXBuilder
 
         public void Initialize()
         {
-            var remoteDirectoryRoot = PSTools.CMD("echo %PSYQ_PROJECTS%");
-            Remote = new DirectoryStructure(remoteDirectoryRoot);
+            //var remoteDirectoryRoot = PSTools.CMD("echo %PSYQ_PROJECTS%");
+            //Remote = new DirectoryStructure(remoteDirectoryRoot);
         }
 
         public bool CopyFilesToRemote(List<String> files)
