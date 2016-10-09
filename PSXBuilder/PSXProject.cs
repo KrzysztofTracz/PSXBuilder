@@ -22,6 +22,7 @@ namespace PSXBuilder
         public String OutputFile     { get; protected set; }
         public String OutputFileName { get; protected set; }
 
+        public List<String> Files       { get; protected set; }
         public List<String> HeaderFiles { get; protected set; }
         public List<String> SourceFiles { get; protected set; }
 
@@ -35,6 +36,8 @@ namespace PSXBuilder
             OutputFile     = "";
             OutputFileName = "";
 
+            Files       = null;
+            HeaderFiles = null;
             SourceFiles = null;
         }
 
@@ -59,6 +62,7 @@ namespace PSXBuilder
 
                 HeaderFiles = GetFiles(project, FileType.Header);
                 SourceFiles = GetFiles(project, FileType.Source);
+                Files       = GetFiles(HeaderFiles, SourceFiles);
             }
 
             return result;
@@ -105,6 +109,21 @@ namespace PSXBuilder
             foreach(var item in items)
             {
                 result.Add(item.EvaluatedInclude);
+            }
+
+            return result;
+        }
+
+        protected List<String> GetFiles(params List<String>[] fileLists)
+        {
+            List<String> result = new List<String>();
+
+            foreach(var files in fileLists)
+            {
+                foreach(var file in files)
+                {
+                    result.Add(file);
+                }
             }
 
             return result;

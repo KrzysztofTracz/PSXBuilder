@@ -9,18 +9,57 @@ namespace PSXBuilder
 {
     class PSTools
     {
-        public static void Exec(params String[] arguments)
+        public static String Exec(String arguments, bool silent = true)
         {
-            Execute(EPsTool.PsExec, arguments);
+            return Execute(silent, arguments);
         }
+
+        public static String CMD(String arguments, bool silent = true)
+        {
+            return Execute(silent, "cmd", "/c", arguments);            
+        }
+
+        public static PSTools Instance
+        {
+            get
+            {
+                if(_instance == null)
+                {
+                    _instance = new PSTools();
+                }
+                return _instance;
+            }
+        }
+
+        private static String Execute(bool silent, params String[] arguments)
+        {
+            var s = Instance.Silent;
+            Instance.Silent = silent;
+
+            var result = Instance.Execute(EPsTool.PsExec, arguments);
+            Instance.Silent = s;
+
+            return result;
+        }
+
+        public bool Silent { get; set; }
 
         private enum EPsTool
         {
             PsExec,
         }
 
-        private static void Execute(EPsTool tool, params String[] arguments)
+        private PSTools()
         {
+            Silent = true;
+        }
+
+        private static PSTools _instance = null;
+
+        private String Execute(EPsTool tool, params String[] arguments)
+        {
+            String result = "";
+
             Process process = new Process();
             process.StartInfo.FileName = Path + "\\" + tool.ToString() + ".exe";
 
@@ -36,33 +75,48 @@ namespace PSXBuilder
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.OutputDataReceived += CaptureOutput;
-            Console.WriteLine("executing: {0} {1}", process.StartInfo.FileName, process.StartInfo.Arguments);
 
+            if (!Silent)
+            {
+                Console.WriteLine("executing: {0} {1}", process.StartInfo.FileName, process.StartInfo.Arguments);
+            }
+
+            outputBuffer.Clear();
             process.Start();
             process.BeginOutputReadLine();
-
             process.WaitForExit();
+
+            result = outputBuffer.ToString();
+            outputBuffer.Clear();
+            return result;
         }
 
-        private static String Path
+        private String Path
         {
             get { return Properties.Settings.Default[Program.Settings.PSToolsPath.ToString()] as String; }
         }
 
-        private static String ConnectionParams
+        private String ConnectionParams
         {
             get
             {
-                return String.Format("\\\\{0} -u {1} -p {2}",
+                return String.Format("\\\\{0} -u {1} -p {2} -nobanner -accepteula",
                                      Properties.Settings.Default[Program.Settings.PSXBuildMachine.ToString()] as String,
                                      Properties.Settings.Default[Program.Settings.PSXBuildMachineUsername.ToString()] as String,
                                      Properties.Settings.Default[Program.Settings.PSXBuildMachinePassword.ToString()] as String);
             }
         }
-
-        private static void CaptureOutput(object sender, DataReceivedEventArgs e)
+    
+        private void CaptureOutput(object sender, DataReceivedEventArgs e)
         {
-            Console.WriteLine("" + e.Data);
+            var str = "" + e.Data;
+            outputBuffer.Append(str);
+            if(!Silent)
+            {
+                Console.WriteLine(str);
+            }
         }
+
+        private StringBuilder outputBuffer = new StringBuilder();
     }
 }

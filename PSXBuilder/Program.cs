@@ -48,6 +48,11 @@ namespace PSXBuilder
                 {                   
                     displayHelp = !Test();
                 }
+                else if (specifier == "-i")
+                {
+                    InteractiveMode();
+                    displayHelp = false;
+                }
             }
            
             if(displayHelp)
@@ -76,11 +81,13 @@ namespace PSXBuilder
             Console.WriteLine("");
             Console.WriteLine("\t-t\tbuild machine connection test");
             Console.WriteLine("");
+            Console.WriteLine("\t-t\tpstools interactive mode");
+            Console.WriteLine("");
         }
 
         static bool Test()
         {
-            PSTools.Exec("cmd /c systeminfo");
+            PSTools.CMD("systeminfo", false);
             return true;
         }
 
@@ -122,6 +129,10 @@ namespace PSXBuilder
                 var project = new PSXProject();
                 if (project.Load(args[1], args[2], args[3]))
                 {
+                    var builder = new Builder();
+                    builder.Initialize(project);
+                    builder.Build();
+
                     result = true;
                 }
             }
@@ -134,6 +145,14 @@ namespace PSXBuilder
             bool result = false;
 
             return result;
+        }
+
+        static void InteractiveMode()
+        {
+            while(true)
+            {
+                PSTools.CMD(System.Console.ReadLine());
+            }
         }
 
         static String Stringify(params String[] args)
