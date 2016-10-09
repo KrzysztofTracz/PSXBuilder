@@ -4,14 +4,22 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSXBuilder", "PSXBuilder\PSXBuilder.csproj", "{061395D3-B887-4B7A-9B51-61EC5FD865BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7} = {C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSXBuildService", "PSXBuildService\PSXBuildService.csproj", "{4282529A-F2FD-4FB5-A90F-63B30A2F05DF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7} = {C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PSXTestProject", "PSXTestProject\PSXTestProject.vcxproj", "{7C821FA1-A6C4-46CD-B9F5-F654110C1F6F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4282529A-F2FD-4FB5-A90F-63B30A2F05DF} = {4282529A-F2FD-4FB5-A90F-63B30A2F05DF}
 		{061395D3-B887-4B7A-9B51-61EC5FD865BB} = {061395D3-B887-4B7A-9B51-61EC5FD865BB}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationFramework", "ApplicationFramework\ApplicationFramework.csproj", "{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +52,14 @@ Global
 		{7C821FA1-A6C4-46CD-B9F5-F654110C1F6F}.Release|Any CPU.ActiveCfg = Release|Win32
 		{7C821FA1-A6C4-46CD-B9F5-F654110C1F6F}.Release|x86.ActiveCfg = Release|Win32
 		{7C821FA1-A6C4-46CD-B9F5-F654110C1F6F}.Release|x86.Build.0 = Release|Win32
+		{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}.Debug|x86.Build.0 = Debug|Any CPU
+		{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

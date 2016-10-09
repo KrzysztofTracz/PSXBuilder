@@ -93,7 +93,7 @@ namespace PSXBuilder
 
         private String Path
         {
-            get { return Properties.Settings.Default[Program.Settings.PSToolsPath.ToString()] as String; }
+            get { return Properties.Settings.Default[PSXBuilder.Settings.PSToolsPath.ToString()] as String; }
         }
 
         private String ConnectionParams
@@ -101,9 +101,9 @@ namespace PSXBuilder
             get
             {
                 return String.Format("\\\\{0} -u {1} -p {2} -nobanner -accepteula",
-                                     Properties.Settings.Default[Program.Settings.PSXBuildMachine.ToString()] as String,
-                                     Properties.Settings.Default[Program.Settings.PSXBuildMachineUsername.ToString()] as String,
-                                     Properties.Settings.Default[Program.Settings.PSXBuildMachinePassword.ToString()] as String);
+                                     Properties.Settings.Default[PSXBuilder.Settings.PSXBuildMachine.ToString()] as String,
+                                     Properties.Settings.Default[PSXBuilder.Settings.PSXBuildMachineUsername.ToString()] as String,
+                                     Properties.Settings.Default[PSXBuilder.Settings.PSXBuildMachinePassword.ToString()] as String);
             }
         }
     
