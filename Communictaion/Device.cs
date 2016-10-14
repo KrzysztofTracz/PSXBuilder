@@ -25,10 +25,11 @@ namespace CommunicationFramework
             IsInitialized = false;
         }
 
-        public void Inititalize(String address)
+        public virtual void Inititalize(String address)
         {
             InitAddress(address);
             RegisterDelegate<Messages.PartialMessageStart>(OnPartialMessageStart);
+            RegisterDelegate<Messages.PingMessage>(OnPingMessage);
             IsInitialized = true;
         }
 
@@ -79,6 +80,27 @@ namespace CommunicationFramework
             return result;
         }
 
+        public virtual bool Disconnect()
+        {
+            return CloseConnection();
+        }
+
+        public bool Ping()
+        {
+            bool result = SendMessage(new Messages.PingMessage());
+            if(result)
+            {
+                WaitForMessage<Messages.PongMessage>();
+            }
+            return result;
+        }
+
+        protected virtual bool OnPingMessage(Messages.PingMessage message)
+        {
+            SendMessage(new Messages.PongMessage());
+            return true;
+        }
+
         protected bool InvokeMessageDelegate(Message message)
         {
             bool result = false;
@@ -100,14 +122,16 @@ namespace CommunicationFramework
                 _stream.Read(headerBuffer, 0, headerBuffer.Length);
 
                 Byte messageID = headerBuffer[0];
-                int messageSize = BitConverter.ToInt32(headerBuffer, 1);
+                int messageSize = BitConverter.ToInt32(headerBuffer, 1) - Message.GetHeaderSize();
 
                 result = Message.Library.GetMessageByID(messageID);
 
-                Byte[] messageDataBuffer = new byte[messageSize];
-                _stream.Read(messageDataBuffer, 0, messageDataBuffer.Length);
-
-                result.FromByteArray(messageDataBuffer);
+                if (messageSize > 0)
+                {
+                    Byte[] messageDataBuffer = new byte[messageSize];
+                    _stream.Read(messageDataBuffer, 0, messageDataBuffer.Length);
+                    result.FromByteArray(messageDataBuffer);
+                }                
             }
             return result;
         }
@@ -191,7 +215,7 @@ namespace CommunicationFramework
             return true;
         }
 
-        protected bool OnPartialMessageStart(Messages.PartialMessageStart message)
+        protected virtual bool OnPartialMessageStart(Messages.PartialMessageStart message)
         {
             int parts  = message.Parts;
             var buffer = new Byte[message.TotalSize];

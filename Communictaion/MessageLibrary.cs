@@ -8,15 +8,26 @@ namespace CommunicationFramework
 {
     public class MessageLibrary
     {
-        public Dictionary<Type,Message> Messages { get; protected set; }
+        public static MessageLibrary Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new MessageLibrary();
+                    instance.RegisterMessages();
+                }
+                return instance;
+            }
+        }
 
-        public bool IsInitialized { get; protected set; }
+        public Dictionary<Type,Message> Messages { get; protected set; }
+        public bool IsInitialized { get; set; }
 
         public MessageLibrary()
         {
             IsInitialized = false;
-            RegisterMessages();
-            IsInitialized = true;
+            Messages      = new Dictionary<Type, Message>();
         }
 
         public Byte GetID(Type messageType)
@@ -48,24 +59,30 @@ namespace CommunicationFramework
             return result;
         }
 
-        protected void RegisterMessages()
+        public void RegisterMessages()
         {
-            Messages = new Dictionary<Type, Message>();
-
-            var assembly = Assembly.GetEntryAssembly();
+            var assembly = Assembly.GetCallingAssembly();
             var types    = assembly.GetTypes();
 
-            Byte id = 0;
             foreach (var type in types)
             {
                 if (type.IsClass && type.IsSubclassOf(typeof(Message)))
                 {
                     var constructor = type.GetConstructor(new Type[] { });
                     var message     = constructor.Invoke(new object[] { }) as Message;
-                    message.InitializeID(id++);
-                    Messages.Add(type, message);
+                    RegisterMessage(message);
                 }
             }
         }
+
+        protected void RegisterMessage(Message message)
+        {
+            message.InitializeID(lastID++);
+            Messages.Add(message.GetType(), message);
+        }
+
+        protected static MessageLibrary instance = null;
+
+        protected Byte lastID   = 0;
     }
 }

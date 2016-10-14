@@ -11,11 +11,7 @@ namespace CommunicationFramework
         {
             get
             {
-                if(_library == null)
-                {
-                    _library = new MessageLibrary();
-                }
-                return _library;
+                return MessageLibrary.Instance;
             }
         }
 

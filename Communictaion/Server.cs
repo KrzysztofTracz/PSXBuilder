@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using CommunicationFramework.Messages;
+using System.Threading;
 
 namespace CommunicationFramework
 {
@@ -17,6 +18,11 @@ namespace CommunicationFramework
             while(true)
             {
                 OpenConnection(_server.AcceptTcpClient());
+                while (true)
+                {
+                    WaitForMessage();
+                    Thread.Sleep(100);
+                }
             }
         }
 

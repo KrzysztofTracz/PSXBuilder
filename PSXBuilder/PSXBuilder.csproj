@@ -104,6 +104,10 @@
       <Project>{2d36f100-e177-4ab8-9116-ba03732af396}</Project>
       <Name>CommunicationFramework</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PSXBuilderNetworking\PSXBuilderNetworking.csproj">
+      <Project>{70b62e88-93b9-498b-9da1-b719e42af77e}</Project>
+      <Name>PSXBuilderNetworking</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

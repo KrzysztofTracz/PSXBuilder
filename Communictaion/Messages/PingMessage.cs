@@ -5,23 +5,21 @@ using System.Text;
 
 namespace CommunicationFramework.Messages
 {
-    public class GetRootDirectoryMessage : Message
+    public class PingMessage : Message
     {
-        public String UserName { get; set; }
+        protected override void AppendData(ByteArrayWriter arrayWriter)
+        {
+            return;
+        }
 
         protected override int GetDataSize()
         {
-            return UserName.Length;
-        }
-
-        protected override void AppendData(ByteArrayWriter arrayWriter)
-        {
-            
+            return 0;
         }
 
         protected override void ReadData(ByteArrayReader arrayReader)
         {
-            
+            return;
         }
     }
 }
