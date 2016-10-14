@@ -46,6 +46,9 @@
     <Compile Include="Message.cs" />
     <Compile Include="MessageLibrary.cs" />
     <Compile Include="Messages\GetRootDirectoryMessage.cs" />
+    <Compile Include="Messages\PartialMessage.cs" />
+    <Compile Include="Messages\PartialMessageReceived.cs" />
+    <Compile Include="Messages\PartialMessageStart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
   </ItemGroup>

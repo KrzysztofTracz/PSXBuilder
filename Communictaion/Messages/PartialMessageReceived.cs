@@ -5,18 +5,16 @@ using System.Text;
 
 namespace CommunicationFramework.Messages
 {
-    public class GetRootDirectoryMessage : Message
+    public class PartialMessageReceived : Message
     {
-        public String UserName { get; set; }
-
-        protected override int GetDataSize()
-        {
-            return UserName.Length;
-        }
-
         protected override void AppendData(ByteArrayWriter arrayWriter)
         {
             
+        }
+
+        protected override int GetDataSize()
+        {
+            return 0;
         }
 
         protected override void ReadData(ByteArrayReader arrayReader)

@@ -21,16 +21,21 @@ namespace CommunicationFramework
 
         public static int GetHeaderSize()
         {
-            return sizeof(Byte) + sizeof(Int16);
+            return sizeof(Byte) + sizeof(int);
+        }
+
+        public static int SizeLimit
+        {
+            get { return 1024; }
         }
 
         public Byte ID { get; protected set; }
 
-        public Int16 Size
+        public int Size
         {
             get
             {
-                return (Int16)(GetHeaderSize() + GetDataSize());
+                return GetHeaderSize() + GetDataSize();
             }
         }
 
@@ -63,7 +68,7 @@ namespace CommunicationFramework
             ReadData(arrayReader);
         }
 
-        protected abstract Int16 GetDataSize();
+        protected abstract int   GetDataSize();
         protected abstract void  AppendData(ByteArrayWriter arrayWriter);
         protected abstract void  ReadData  (ByteArrayReader arrayReader);
 

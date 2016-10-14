@@ -12,29 +12,33 @@ namespace CommunicationFramework
         public IPAddress IPAdress { get; protected set; }
         public Int32     Port     { get; protected set; }
 
-        public bool IsConnected { get; protected set; }
+        public bool IsInitialized { get; protected set; }
+        public bool IsConnected   { get; protected set; }
 
-        public delegate void OnMessageDelegate<T>(T message) where T : Message;
+        public delegate bool OnMessageDelegate<T>(T message) where T : Message;
 
         public Device()
         {
-            IPAdress    = null;
-            Port        = -1;
-            IsConnected = false;
+            IPAdress      = null;
+            Port          = -1;
+            IsConnected   = false;
+            IsInitialized = false;
         }
 
         public void Inititalize(String address)
         {
             InitAddress(address);
+            RegisterDelegate<Messages.PartialMessageStart>(OnPartialMessageStart);
+            IsInitialized = true;
         }
 
         public bool SendMessage(Message message)
         {
             bool result = false;
-            if(IsConnected)
+            if(IsInitialized)
             {
-                _stream.Write(message.ToByteArray(), 0, message.Size);
-                result = true;
+                result = message.Size > Message.SizeLimit ? SendMessageInParts(message)
+                                                          : SendSingleMessage(message);
             }
             return result;
         }
@@ -42,30 +46,168 @@ namespace CommunicationFramework
         public bool WaitForMessage()
         {
             bool result = false;
+            if (IsInitialized)
+            {
+                var message = ReadMessageFromStream();
+                {
+                    result = InvokeMessageDelegate(message);
+                }
+            }
+            return result;
+        }
+
+        public T WaitForMessage<T>() where T : Message
+        {
+            T result = null;
+            if (IsInitialized)
+            {
+                Message message = ReadMessageFromStream();
+                while (message != null)
+                {
+                    if (message.GetType().Equals(typeof(T)))
+                    {
+                        result = message as T;
+                        break;
+                    }
+                    else
+                    {
+                        InvokeMessageDelegate(message);
+                        message = ReadMessageFromStream();
+                    }
+                }
+            }            
+            return result;
+        }
+
+        protected bool InvokeMessageDelegate(Message message)
+        {
+            bool result = false;
+            if (message != null &&
+                messageDelegates.ContainsKey(message.GetType()))
+            {
+                var messageDelegate = messageDelegates[message.GetType()];
+                result = (bool)messageDelegate.DynamicInvoke(message);
+            }
+            return result;
+        }
+
+        protected Message ReadMessageFromStream()
+        {
+            Message result = null;
             if (IsConnected)
             {
                 Byte[] headerBuffer = new Byte[Message.GetHeaderSize()];
                 _stream.Read(headerBuffer, 0, headerBuffer.Length);
 
-                Byte  messageID   = headerBuffer[0];
-                Int16 messageSize = BitConverter.ToInt16(headerBuffer, 1);
+                Byte messageID = headerBuffer[0];
+                int messageSize = BitConverter.ToInt32(headerBuffer, 1);
 
-                var message = Message.Library.GetMessageByID(messageID);
+                result = Message.Library.GetMessageByID(messageID);
 
                 Byte[] messageDataBuffer = new byte[messageSize];
                 _stream.Read(messageDataBuffer, 0, messageDataBuffer.Length);
 
-                message.FromByteArray(messageDataBuffer);
+                result.FromByteArray(messageDataBuffer);
+            }
+            return result;
+        }
 
-                if(messageDelegates.ContainsKey(message.GetType()))
+        protected Message GetMessageFromBuffer(Byte[] buffer)
+        {
+            Message result = null;
+            if(buffer.Length >= Message.GetHeaderSize())
+            {
+                Byte messageID  = buffer[0];
+                int messageSize = BitConverter.ToInt32(buffer, 1);
+
+                result = Message.Library.GetMessageByID(messageID);
+
+                Byte[] messageDataBuffer = new byte[messageSize];
+                for(int i = Message.GetHeaderSize(); i < buffer.Length; i++)
                 {
-                    var messageDelegate = messageDelegates[message.GetType()];
-                    messageDelegate.DynamicInvoke(message);
-                }                
+                    messageDataBuffer[i - Message.GetHeaderSize()] = buffer[i];
+                }
+                result.FromByteArray(messageDataBuffer);
+            }
+            return result;
+        }
 
+        protected Byte[] PartialMessageDataBuffer = null;
+
+        protected Byte[] GetPartialMeddageDataFromBuffer()
+        {
+            var size = PartialMessageDataBuffer.Length > Message.SizeLimit ? Message.SizeLimit
+                                                                           : PartialMessageDataBuffer.Length;
+            var result = new Byte[size];
+            for(int i=0;i<size;i++)
+            {
+                result[i] = PartialMessageDataBuffer[i];
+            }
+
+            var newBufferSize = PartialMessageDataBuffer.Length - size;
+            var newBuffer = new Byte[newBufferSize];
+            for(int i=size;i<PartialMessageDataBuffer.Length;i++)
+            {
+                newBuffer[i - size] = PartialMessageDataBuffer[i];
+            }
+            PartialMessageDataBuffer = newBuffer;
+
+            return result;
+        }
+        
+        protected bool SendMessageInParts(Message message)
+        {
+            bool result = false;
+            if (IsConnected)
+            {
+                PartialMessageDataBuffer = message.ToByteArray();
+                int parts = PartialMessageDataBuffer.Length / Message.SizeLimit;
+
+                var partialMessageStart = new Messages.PartialMessageStart();
+                partialMessageStart.Parts     = parts;
+                partialMessageStart.TotalSize = PartialMessageDataBuffer.Length;
+
+                SendSingleMessage(partialMessageStart);
+                WaitForMessage<Messages.PartialMessageReceived>();
+
+                while (PartialMessageDataBuffer.Length > 0)
+                {
+                    var partialMessage = new Messages.PartialMessage();
+                    partialMessage.Data = GetPartialMeddageDataFromBuffer();
+                    SendSingleMessage(partialMessage);
+                    WaitForMessage<Messages.PartialMessageReceived>();
+                }
                 result = true;
             }
             return result;
+        }
+
+        protected bool SendSingleMessage(Message message)
+        {
+            if (IsConnected)
+            {
+                _stream.Write(message.ToByteArray(), 0, message.Size);
+            }
+            return true;
+        }
+
+        protected bool OnPartialMessageStart(Messages.PartialMessageStart message)
+        {
+            int parts  = message.Parts;
+            var buffer = new Byte[message.TotalSize];
+            int cursor = 0;
+
+            SendSingleMessage(new Messages.PartialMessageReceived());
+            for(int part=0;part<parts;part++)
+            {
+                var partialMessage = WaitForMessage<Messages.PartialMessage>();
+                for(int i=0;i<partialMessage.Data.Length;i++,cursor++)
+                {
+                    buffer[cursor] = partialMessage.Data[i];
+                }
+                SendSingleMessage(new Messages.PartialMessageReceived());
+            }
+            return InvokeMessageDelegate(GetMessageFromBuffer(buffer));
         }
 
         protected bool OpenConnection(TcpClient client)
