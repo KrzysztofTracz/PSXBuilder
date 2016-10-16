@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CommunicationFramework;
+using CommunicationFramework.Messages;
 
 namespace Uploader
 {
@@ -13,12 +14,14 @@ namespace Uploader
         static int Main(string[] args)
         {
             int result = -1; 
-            if (args.Length == 2)
+            if (args.Length == 3)
             {
-                var ip       = NetworkingSystem.LocalHost;
-                var path     = args[1];
-                var filename = path.Split('\\').Last();
-                var file     = System.IO.File.ReadAllBytes(path);
+                var separator       = '\\';
+                var ip              = NetworkingSystem.LocalHost; // args[0]
+                var path            = args[1];
+                var filename        = path.Split(separator).Last();
+                var file            = System.IO.File.ReadAllBytes(path);
+                var targetDirectory = args[2];
 
                 NetworkingSystem.Initialize("14000", ip);
 
@@ -27,9 +30,13 @@ namespace Uploader
                                    new DefaultDeviceLog());
                 client.Connect();
 
-                var message = new CommunicationFramework.Messages.FileUploadMessage();
-                message.FileName = filename;
+                var message = new FileUploadMessage();
+                message.FileName = targetDirectory + separator + filename;
                 message.File     = file;
+
+                Console.WriteLine("Uploading {0} [{1} bytes]",
+                                  path,
+                                  message.File.Length);
 
                 client.SendMessage(message);
 
