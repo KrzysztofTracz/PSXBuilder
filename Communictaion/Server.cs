@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using CommunicationFramework.Messages;
+﻿using System.Net.Sockets;
 using System.Threading;
 
 namespace CommunicationFramework
@@ -15,7 +10,9 @@ namespace CommunicationFramework
             _server = new TcpListener(IPAdress, Port);
             _server.Start();
 
-            while(true)
+            ConsoleWriteLine("Starting server at {0}:{1}.", IPAdress, Port);
+
+            while (true)
             {
                 OpenConnection(_server.AcceptTcpClient());
                 try

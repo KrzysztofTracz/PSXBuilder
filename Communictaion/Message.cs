@@ -64,6 +64,11 @@ namespace CommunicationFramework
             ReadData(arrayReader);
         }
 
+        public String GetName()
+        {
+            return GetType().Name;
+        }
+
         protected abstract int   GetDataSize();
         protected abstract void  AppendData(ByteArrayWriter arrayWriter);
         protected abstract void  ReadData  (ByteArrayReader arrayReader);

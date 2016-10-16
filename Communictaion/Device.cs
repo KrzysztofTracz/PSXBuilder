@@ -31,12 +31,13 @@ namespace CommunicationFramework
             IsInitialized = false;
         }
 
-        public virtual void Inititalize(String address)
+        public virtual void Inititalize(String address, IDeviceListener deviceListener = null)
         {
             InitAddress(address);
             RegisterDelegate<Messages.PartialMessageStart>(OnPartialMessageStart);
             RegisterDelegate<Messages.PingMessage>(OnPingMessage);
             IsInitialized = true;
+            _console = deviceListener;
         }
 
         public bool StayConnected()
@@ -69,6 +70,7 @@ namespace CommunicationFramework
 
         public bool WaitForMessage()
         {
+            ConsoleWriteLine("Waiting for message.");
             bool result = false;
             if (IsInitialized)
             {
@@ -82,6 +84,7 @@ namespace CommunicationFramework
 
         public T WaitForMessage<T>() where T : Message
         {
+            ConsoleWriteLine("Waiting for {0}.", typeof(T).Name);
             T result = null;
             if (IsInitialized)
             {
@@ -154,7 +157,9 @@ namespace CommunicationFramework
                     Byte[] messageDataBuffer = new byte[messageSize];
                     _stream.Read(messageDataBuffer, 0, messageDataBuffer.Length);
                     result.FromByteArray(messageDataBuffer);
-                }                
+                }
+
+                ConsoleWriteLine("{0} received.", result.GetName());
             }
             return result;
         }
@@ -233,6 +238,7 @@ namespace CommunicationFramework
         {
             if (IsConnected)
             {
+                ConsoleWriteLine("Sending {0}", message.GetName());
                 _stream.Write(message.ToByteArray(), 0, message.Size);
             }
             return true;
@@ -259,6 +265,7 @@ namespace CommunicationFramework
 
         protected bool OpenConnection(TcpClient client)
         {
+            ConsoleWriteLine("Opening connection.");
             _tcpClient  = client;
             _stream     = _tcpClient.GetStream();
             return true;
@@ -266,17 +273,18 @@ namespace CommunicationFramework
 
         protected bool CloseConnection()
         {
-            if(_stream != null)
+            ConsoleWriteLine("Closing connection.");
+            if (_stream != null)
             {
                 _stream.Close();
                 _stream = null;
             }
 
-            if(_tcpClient != null)
+            if (_tcpClient != null)
             {
                 _tcpClient.Close();
                 _tcpClient = null;
-            }            
+            }
             return true;
         }
 
@@ -296,8 +304,22 @@ namespace CommunicationFramework
             }
         }
 
-        private TcpClient     _tcpClient = null;
-        private NetworkStream _stream    = null;
+        protected void ConsoleWriteLine(String format, params object[] objects)
+        {
+            ConsoleWriteLine(String.Format(format, objects));
+        }
+
+        protected void ConsoleWriteLine(String text)
+        {
+            if(_console != null)
+            {
+                _console.WriteLine(text);
+            }
+        }
+
+        private TcpClient       _tcpClient = null;
+        private NetworkStream   _stream    = null;
+        private IDeviceListener _console   = null;
 
         private Dictionary<Type, Delegate> messageDelegates = new Dictionary<Type, Delegate>();
     }

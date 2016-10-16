@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using ApplicationFramework;
+using PSXBuilderNetworking;
 
 namespace PSXBuilder
 {
@@ -13,6 +14,8 @@ namespace PSXBuilder
             PSXSDKPath
         }
 
+        public static NetworkingSystem NetworkingSystem = new NetworkingSystem();
+
         public static String GetValue(Settings settings)
         {
             return Properties.Settings.Default[settings.ToString()].ToString();
@@ -20,7 +23,7 @@ namespace PSXBuilder
 
         static int Main(String[] args)
         {
-            PSXBuilderNetworking.System.Initialize();
+            NetworkingSystem.Initialize(GetValue(Settings.PSXBuildMachineAddress));
 
             var application = new Application("PSXBuilder");
             var result = application.Start(args);
