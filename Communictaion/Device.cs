@@ -13,7 +13,14 @@ namespace CommunicationFramework
         public Int32     Port     { get; protected set; }
 
         public bool IsInitialized { get; protected set; }
-        public bool IsConnected   { get; protected set; }
+
+        public bool IsConnected
+        {
+            get
+            {
+                return _tcpClient != null && _tcpClient.Connected;
+            }
+        }
 
         public delegate bool OnMessageDelegate<T>(T message) where T : Message;
 
@@ -21,7 +28,6 @@ namespace CommunicationFramework
         {
             IPAdress      = null;
             Port          = -1;
-            IsConnected   = false;
             IsInitialized = false;
         }
 
@@ -31,6 +37,23 @@ namespace CommunicationFramework
             RegisterDelegate<Messages.PartialMessageStart>(OnPartialMessageStart);
             RegisterDelegate<Messages.PingMessage>(OnPingMessage);
             IsInitialized = true;
+        }
+
+        public bool StayConnected()
+        {
+            bool result = true;
+            if(IsConnected)
+            {
+                SendSingleMessage(new Messages.Heartbeat());
+                _tcpClient.Client.Poll(0, SelectMode.SelectRead);
+            }
+
+            if(!IsConnected)
+            {
+                CloseConnection();
+                result = false;
+            }
+            return result;
         }
 
         public bool SendMessage(Message message)
@@ -238,21 +261,22 @@ namespace CommunicationFramework
         {
             _tcpClient  = client;
             _stream     = _tcpClient.GetStream();
-            IsConnected = true;
-
             return true;
         }
 
         protected bool CloseConnection()
         {
-            _stream.Close();
-            _stream = null;
+            if(_stream != null)
+            {
+                _stream.Close();
+                _stream = null;
+            }
 
-            _tcpClient.Close();
-            _tcpClient = null;
-
-            IsConnected = false;
-
+            if(_tcpClient != null)
+            {
+                _tcpClient.Close();
+                _tcpClient = null;
+            }            
             return true;
         }
 

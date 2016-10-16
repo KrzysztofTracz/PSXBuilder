@@ -18,10 +18,18 @@ namespace CommunicationFramework
             while(true)
             {
                 OpenConnection(_server.AcceptTcpClient());
-                while (true)
+                try
                 {
-                    WaitForMessage();
-                    Thread.Sleep(100);
+                    while (StayConnected())
+                    {
+                        WaitForMessage();
+                        Thread.Sleep(100);
+                    }
+                }
+                catch (System.IO.IOException) { }
+                finally
+                {
+                    CloseConnection();
                 }
             }
         }
