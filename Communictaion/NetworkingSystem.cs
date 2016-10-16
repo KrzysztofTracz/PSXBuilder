@@ -9,6 +9,23 @@ namespace CommunicationFramework
 {
     public class NetworkingSystem
     {
+        public const String LocalHost = "127.0.0.1";
+
+        public String Port               { get; protected set; }
+        public String ConectionIPAddress { get; protected set; }
+
+        public virtual void Initialize(String port,
+                                       String connectionIPAdress = null)
+        {
+            Port = port;
+            if (String.IsNullOrEmpty(connectionIPAdress))
+            {
+                connectionIPAdress = GetLocalIPAddress();
+            }
+            ConectionIPAddress = connectionIPAdress;
+            Message.Library.IsInitialized = true;
+        }
+
         public String GetLocalIPAddress()
         {
             String result = "";
@@ -32,6 +49,15 @@ namespace CommunicationFramework
                 }
             }
             return result;
+        }
+
+        public String GetConnectionAddress()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(ConectionIPAddress);
+            sb.Append(":");
+            sb.Append(Port);
+            return sb.ToString();
         }
     }
 }

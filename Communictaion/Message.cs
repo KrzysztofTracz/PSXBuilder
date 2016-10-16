@@ -55,6 +55,8 @@ namespace CommunicationFramework
             arrayWriter.Append(ID);
             arrayWriter.Append(BitConverter.GetBytes(Size));
 
+            AppendData(arrayWriter);
+
             return arrayWriter.GetArray();
         }
 
@@ -67,6 +69,11 @@ namespace CommunicationFramework
         public String GetName()
         {
             return GetType().Name;
+        }
+
+        public static int GetStringSize(String value)
+        {
+            return sizeof(char) * value.Length;
         }
 
         protected abstract int   GetDataSize();

@@ -42,6 +42,19 @@ namespace CommunicationFramework
             }
         }
 
+        public void Append(int value)
+        {
+            Append(BitConverter.GetBytes(value));
+        }
+
+        public void Append(String value)
+        {
+            foreach(var c in value)
+            {
+                Append(BitConverter.GetBytes(c));
+            }                       
+        }
+
         public Byte[] GetArray()
         {
             return buffer;

@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommunicationFramework", "C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSXBuilderNetworking", "PSXBuilderNetworking\PSXBuilderNetworking.csproj", "{70B62E88-93B9-498B-9DA1-B719E42AF77E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UploaderService", "UploaderService\UploaderService.csproj", "{0389E37A-1E30-44ED-98DE-83A35FF0339B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uploader", "Uploader\Uploader.csproj", "{C07C19B2-DEA6-4349-BD52-D96AAFE9ABC6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,6 +86,22 @@ Global
 		{70B62E88-93B9-498B-9DA1-B719E42AF77E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{70B62E88-93B9-498B-9DA1-B719E42AF77E}.Release|x86.ActiveCfg = Release|Any CPU
 		{70B62E88-93B9-498B-9DA1-B719E42AF77E}.Release|x86.Build.0 = Release|Any CPU
+		{0389E37A-1E30-44ED-98DE-83A35FF0339B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0389E37A-1E30-44ED-98DE-83A35FF0339B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0389E37A-1E30-44ED-98DE-83A35FF0339B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0389E37A-1E30-44ED-98DE-83A35FF0339B}.Debug|x86.Build.0 = Debug|Any CPU
+		{0389E37A-1E30-44ED-98DE-83A35FF0339B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0389E37A-1E30-44ED-98DE-83A35FF0339B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0389E37A-1E30-44ED-98DE-83A35FF0339B}.Release|x86.ActiveCfg = Release|Any CPU
+		{0389E37A-1E30-44ED-98DE-83A35FF0339B}.Release|x86.Build.0 = Release|Any CPU
+		{C07C19B2-DEA6-4349-BD52-D96AAFE9ABC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C07C19B2-DEA6-4349-BD52-D96AAFE9ABC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C07C19B2-DEA6-4349-BD52-D96AAFE9ABC6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C07C19B2-DEA6-4349-BD52-D96AAFE9ABC6}.Debug|x86.Build.0 = Debug|Any CPU
+		{C07C19B2-DEA6-4349-BD52-D96AAFE9ABC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C07C19B2-DEA6-4349-BD52-D96AAFE9ABC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C07C19B2-DEA6-4349-BD52-D96AAFE9ABC6}.Release|x86.ActiveCfg = Release|Any CPU
+		{C07C19B2-DEA6-4349-BD52-D96AAFE9ABC6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

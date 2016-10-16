@@ -41,6 +41,22 @@ namespace CommunicationFramework
             return result;
         }
 
+        public int ReadInt()
+        {
+            return BitConverter.ToInt32(Read(sizeof(int)), 0);
+        }
+
+        public String ReadString(int size)
+        {
+            StringBuilder sb = new StringBuilder();
+            size = size / sizeof(char);
+            for(int i=0;i<size;i++)
+            {
+                sb.Append(BitConverter.ToChar(Read(sizeof(char)),0));
+            }
+            return sb.ToString();
+        }
+
         public Byte[] ReadAll()
         {
             return Read(buffer.Length - Cursor);

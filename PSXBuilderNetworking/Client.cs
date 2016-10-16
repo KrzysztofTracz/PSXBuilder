@@ -7,7 +7,7 @@ namespace PSXBuilderNetworking
 {
     public class Client : CommunicationFramework.Client
     {
-        public override void Inititalize(string address, CommunicationFramework.IDeviceListener deviceListener = null)
+        public override void Inititalize(string address, CommunicationFramework.IDeviceLog deviceListener = null)
         {
             base.Inititalize(address, deviceListener);
             RegisterDelegates();

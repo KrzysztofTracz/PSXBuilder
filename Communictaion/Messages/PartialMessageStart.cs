@@ -12,17 +12,19 @@ namespace CommunicationFramework.Messages
 
         protected override void AppendData(ByteArrayWriter arrayWriter)
         {
-            arrayWriter.Append(BitConverter.GetBytes(Parts));
+            arrayWriter.Append(Parts);
+            arrayWriter.Append(TotalSize);
         }
 
         protected override int GetDataSize()
         {
-            return sizeof(int);
+            return sizeof(int) * 2;
         }
 
         protected override void ReadData(ByteArrayReader arrayReader)
         {
-            Parts = BitConverter.ToInt32(arrayReader.Read(GetDataSize()), 0);
+            Parts     = arrayReader.ReadInt();
+            TotalSize = arrayReader.ReadInt();
         }
     }
 }

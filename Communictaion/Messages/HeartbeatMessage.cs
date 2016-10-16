@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CommunicationFramework.Messages
 {
-    public class Heartbeat : Message
+    public class HeartbeatMessage : Message
     {
         protected override void AppendData(ByteArrayWriter arrayWriter)
         {

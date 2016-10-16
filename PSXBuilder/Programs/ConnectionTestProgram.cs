@@ -6,7 +6,7 @@ using PSXBuilderNetworking;
 
 namespace PSXBuilder
 {
-    class ConnectionTestProgram : ApplicationFramework.Program, CommunicationFramework.IDeviceListener
+    class ConnectionTestProgram : ApplicationFramework.Program, CommunicationFramework.IDeviceLog
     {
         public override bool Start(params String[] arguments)
         {

@@ -17,20 +17,10 @@ namespace PSXBuildService
         {
             NetworkingSystem.Initialize();
 
-            var deviceListener = new DeviceListener();
-
             var server = new Server();
-            server.Inititalize(NetworkingSystem.GetConnectionAddress(), 
-                               deviceListener);
+            server.Inititalize(NetworkingSystem.GetConnectionAddress(),
+                               new CommunicationFramework.DefaultDeviceLog());
             server.Start();
-        }
-
-        class DeviceListener : CommunicationFramework.IDeviceListener
-        {
-            public void WriteLine(string text)
-            {
-                Console.WriteLine(">> " + text);
-            }
         }
     }
 }

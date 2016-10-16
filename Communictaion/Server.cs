@@ -10,7 +10,7 @@ namespace CommunicationFramework
             _server = new TcpListener(IPAdress, Port);
             _server.Start();
 
-            ConsoleWriteLine("Starting server at {0}:{1}.", IPAdress, Port);
+            Log("Starting server at {0}:{1}.", IPAdress, Port);
 
             while (true)
             {
