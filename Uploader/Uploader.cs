@@ -17,7 +17,7 @@ namespace Uploader
             if (args.Length == 3)
             {
                 var separator       = '\\';
-                var ip              = NetworkingSystem.LocalHost; // args[0]
+                var ip              = args[0];
                 var path            = args[1];
                 var filename        = path.Split(separator).Last();
                 var file            = System.IO.File.ReadAllBytes(path);

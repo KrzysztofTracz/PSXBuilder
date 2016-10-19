@@ -13,7 +13,7 @@ namespace UploaderService
 
         static void Main(string[] args)
         {
-            NetworkingSystem.Initialize("14000", NetworkingSystem.LocalHost);
+            NetworkingSystem.Initialize("14000");
 
             var server = new Server();
             server.Inititalize(NetworkingSystem.GetConnectionAddress(),
