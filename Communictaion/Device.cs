@@ -8,7 +8,7 @@ using System.Text;
 
 namespace CommunicationFramework
 {
-    public abstract class Device
+    public abstract class Device : IDisposable
     {
         public IPAddress IPAdress { get; protected set; }
         public Int32     Port     { get; protected set; }
@@ -37,6 +37,7 @@ namespace CommunicationFramework
             InitAddress(address);
             RegisterDelegate<Messages.PartialMessageStart>(OnPartialMessageStart);
             RegisterDelegate<Messages.PingMessage>(OnPingMessage);
+            RegisterDelegate<Messages.ClosingConnectionMessage>(OnClosingConnectionMessage);
             IsInitialized = true;
             _logger = loggger;
         }
@@ -211,6 +212,7 @@ namespace CommunicationFramework
         protected bool SendMessageInParts(Message message)
         {
             bool result = false;
+
             if (IsConnected)
             {
                 PartialMessageDataBuffer = message.ToByteArray();
@@ -225,13 +227,19 @@ namespace CommunicationFramework
                                  partialMessageStart.Parts,
                                  partialMessageStart.TotalSize);
 
+#if !DEBUG
+                var l = _logger;
+                _logger = null;
+#endif
+
                 SendSingleMessage(partialMessageStart);
                 WaitForMessage<Messages.PartialMessageReceived>();
 
                 while (PartialMessageDataBuffer.Length > 0)
                 {
+
                     Log("{0} bytes left",
-                                     PartialMessageDataBuffer.Length);
+                        PartialMessageDataBuffer.Length);
 
                     var partialMessage = new Messages.PartialMessage();
                     partialMessage.Data = GetPartialMessageDataFromBuffer();
@@ -239,6 +247,10 @@ namespace CommunicationFramework
                     WaitForMessage<Messages.PartialMessageReceived>();
                 }
                 result = true;
+
+#if !DEBUG
+                _logger = l;
+#endif
             }
             return result;
         }
@@ -255,13 +267,17 @@ namespace CommunicationFramework
 
         protected virtual bool OnPartialMessageStart(Messages.PartialMessageStart message)
         {
+#if !DEBUG
+            var l = _logger;
+            _logger = null;
+#endif
             int parts  = message.Parts;
             var buffer = new Byte[message.TotalSize];
             int cursor = 0;
 
             Log("Receiving message in {0} parts [{1} bytes]",
-                             message.Parts,
-                             message.TotalSize);
+                message.Parts,
+                message.TotalSize);
 
             SendSingleMessage(new Messages.PartialMessageReceived());
 
@@ -276,13 +292,15 @@ namespace CommunicationFramework
                 Log("{0} parts received [{1} bytes]",
                                  part + 1,
                                  cursor);
-                    
+
                 SendSingleMessage(new Messages.PartialMessageReceived());
             }
 
             var receivedMessage = GetMessageFromBuffer(buffer);
             Log("{0} received.", receivedMessage.GetName());
-
+#if !DEBUG
+            _logger = l;
+#endif
             return InvokeMessageDelegate(receivedMessage);
         }
 
@@ -297,6 +315,12 @@ namespace CommunicationFramework
         protected bool CloseConnection()
         {
             Log("Closing connection.");
+            if(IsConnected)
+            {
+                SendMessage(new Messages.ClosingConnectionMessage());
+                WaitForMessage<Messages.ConnectionClosedMessage>();
+            }
+
             if (_stream != null)
             {
                 _stream.Close();
@@ -308,6 +332,12 @@ namespace CommunicationFramework
                 _tcpClient.Close();
                 _tcpClient = null;
             }
+            return true;
+        }
+
+        protected bool OnClosingConnectionMessage(Messages.ClosingConnectionMessage message)
+        {
+            SendMessage(new Messages.ConnectionClosedMessage());
             return true;
         }
 
@@ -338,6 +368,11 @@ namespace CommunicationFramework
             {
                 _logger.Log(text);
             }
+        }
+
+        public virtual void Dispose()
+        {
+            CloseConnection();
         }
 
         private TcpClient     _tcpClient = null;

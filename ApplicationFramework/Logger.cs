@@ -14,7 +14,7 @@ namespace ApplicationFramework
 
     public class Logger : ILogger, IDisposable
     {
-        public const String Directory        = "log";
+        public const String LogDirectoryName = "log";
         public const String LogFileExtension = "txt";
         public const int    MaxLogFiles      = 10;
 
@@ -58,9 +58,10 @@ namespace ApplicationFramework
 
         protected void ClearLogFiles()
         {
-            if (System.IO.Directory.Exists(Directory))
+            var directory = GetLogDirectory();
+            if (Directory.Exists(directory))
             {
-                var files = new List<String>(System.IO.Directory.EnumerateFiles(Directory, "*." + LogFileExtension));
+                var files = new List<String>(Directory.EnumerateFiles(directory, "*." + LogFileExtension));
                 if (files.Count > MaxLogFiles)
                 {
                     files.Sort((f1, f2) => { return File.GetCreationTime(f1).CompareTo(File.GetCreationTime(f2)); });
@@ -72,10 +73,17 @@ namespace ApplicationFramework
             }
         }
 
+        protected String GetLogDirectory()
+        {
+            return String.Format("{0}\\{1}",
+                                 Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+                                 LogDirectoryName);
+        }
+
         protected String GetLogFilePath()
         {
-            return String.Format("{0}\\{1}.{2}", 
-                                 Directory, 
+            return String.Format("{0}\\{1}.{2}",
+                                 GetLogDirectory(), 
                                  Utils.GetAcceptableFileName(GetTimeStamp()), 
                                  LogFileExtension);
         }
@@ -87,7 +95,7 @@ namespace ApplicationFramework
 
         protected void WriteLineToFile(String text)
         {
-            var bytes = Encoding.ASCII.GetBytes(String.Format("{0}\n", text));
+            var bytes = Encoding.ASCII.GetBytes(String.Format("{0}\r\n", text));
             _file.Write(bytes, 0, bytes.Length);
             _file.Flush();
         }

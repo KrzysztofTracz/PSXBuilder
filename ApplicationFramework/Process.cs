@@ -11,6 +11,11 @@ namespace ApplicationFramework
         public String   FileName  { get; protected set; }
         public String[] Arguments { get; protected set; }
 
+        public bool IsOutputEmpty
+        {
+            get { return outputBuffer.Length > 0; }
+        }
+
         public String Output
         {
             get { return outputBuffer.ToString(); }
@@ -22,18 +27,22 @@ namespace ApplicationFramework
             Arguments = arguments;
         }
 
-        public int Run(ILogger logger = null)
+        public int Run(ILogger logger = null, bool waitForExit = true)
         {
-            int result = -1;
+            int result = 0;
 
             var process = new System.Diagnostics.Process();
 
             process.StartInfo.FileName               = FileName;
             process.StartInfo.Arguments              = Utils.ConcatArguments(" ", Arguments);
-            process.StartInfo.WindowStyle            = ProcessWindowStyle.Hidden;
-            process.StartInfo.UseShellExecute        = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.OutputDataReceived              += CaptureOutput;
+
+            if(waitForExit)
+            {
+                process.StartInfo.WindowStyle            = ProcessWindowStyle.Hidden;
+                process.StartInfo.UseShellExecute        = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.OutputDataReceived              += CaptureOutput;
+            }
 
             if(logger != null)
             {
@@ -42,14 +51,21 @@ namespace ApplicationFramework
 
             outputBuffer.Clear();
             process.Start();
-            process.BeginOutputReadLine();
-            process.WaitForExit();
-            result = process.ExitCode;
 
-            if (logger != null)
+            if (waitForExit)
             {
-                logger.Log(Output);
-                logger.Log(String.Format("{0} exited with code: {1}", process.StartInfo.FileName, result));
+                process.BeginOutputReadLine();
+                process.WaitForExit();
+                result = process.ExitCode;
+
+                if (logger != null)
+                {
+                    if(!IsOutputEmpty)
+                    {
+                        logger.Log(Output);
+                    }
+                    logger.Log(String.Format("{0} exited with code: {1}", process.StartInfo.FileName, result));
+                }
             }
 
             return result;

@@ -45,6 +45,8 @@
     <Compile Include="Device.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="MessageLibrary.cs" />
+    <Compile Include="Messages\ClosingConnectionMessage.cs" />
+    <Compile Include="Messages\ConnectionClosedMessage.cs" />
     <Compile Include="Messages\FileUploadMessage.cs" />
     <Compile Include="Messages\HeartbeatMessage.cs" />
     <Compile Include="Messages\PartialMessage.cs" />

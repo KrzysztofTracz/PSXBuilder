@@ -48,6 +48,8 @@ namespace Uploader
 
                 SendRunProcess(client, targetDirectory + Separator + filename);
 
+                client.Disconnect();
+
                 result = 0;
             }
             return result;

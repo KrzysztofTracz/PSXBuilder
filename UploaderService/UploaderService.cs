@@ -20,7 +20,11 @@ namespace UploaderService
             var server = new Server();
             server.Inititalize(NetworkingSystem.GetConnectionAddress(),
                                Console);
+
+            server.RegisterDelegate<TaskKillMessage>(OnTaskKillMessage);
+            server.RegisterDelegate<RunProcessMessage>(OnRunProcessMessage);
             server.RegisterDelegate<FileUploadMessage>(OnFileUploadMessage);
+
             server.Start();
         }
 
@@ -39,7 +43,7 @@ namespace UploaderService
             bool result = false;
 
             var process = new ApplicationFramework.Process(message.Process, message.Arguments);
-            result = process.Run(Console) == 0;
+            result = process.Run(Console, false) == 0;
 
             return result;
         }
@@ -60,7 +64,7 @@ namespace UploaderService
             filestream.Close();
 
             Console.WriteLine("Saved at {0}",
-                              fileName);
+                              path);
 
             return result;
         }
