@@ -74,11 +74,9 @@ namespace Uploader
             client.SendMessage(message);
         }
 
-        static void SendRunProcess(Client client, String path)
+        static void SendRunProcess(Client client, String process, params String[] arguments)
         {
-            var message = new RunProcessMessage();
-            message.ExeName = path;
-            client.SendMessage(message);
+            client.SendMessage(new RunProcessMessage(process, arguments));
         }
 
         static String GetFileName(String path)

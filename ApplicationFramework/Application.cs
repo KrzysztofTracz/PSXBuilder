@@ -24,7 +24,7 @@ namespace ApplicationFramework
         {
             bool result = true;
 
-            Console.WriteLine("{0} {1}", Name, ConcatArguments(" ", arguments));
+            Console.WriteLine("{0} {1}", Name, Utils.ConcatArguments(" ", arguments));
             Console.WriteLineSeparator();
 
             var displayHelp = true;
@@ -64,7 +64,7 @@ namespace ApplicationFramework
             foreach (var program in programs)
             {
                 Console.WriteLine("{0}\t{1}", program.Specifier, 
-                                              ConcatArguments(" ", program.Arguments));
+                                              Utils.ConcatArguments(" ", program.Arguments));
                 Console.PushTab();
                 Console.WriteLine(program.Description);
                 Console.PopTab();
@@ -84,25 +84,6 @@ namespace ApplicationFramework
                 result = Programs[typeof(T)] as T;
             }
 
-            return result;
-        }
-
-        public String ConcatArguments(String separator, params String[] arguments)
-        {
-            String result = "";
-            if (arguments != null)
-            {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < arguments.Length; i++)
-                {
-                    sb.Append(arguments[i]);
-                    if (i < arguments.Length - 1)
-                    {
-                        sb.Append(separator);
-                    }
-                }
-                result = sb.ToString();
-            }
             return result;
         }
 

@@ -7,21 +7,40 @@ namespace CommunicationFramework.Messages
 {
     public class RunProcessMessage : Message
     {
-        public String ExeName { get; set; }
+        public String Process   { get; set; }
+        public String Arguments { get; set; }
+
+        public RunProcessMessage()
+        {
+            Process   = "";
+            Arguments = "";
+        }
+
+        public RunProcessMessage(String process, params String[] arguments)
+        {
+            Process   = process;
+            Arguments = ApplicationFramework.Utils.ConcatArguments(" ", arguments);
+        }
 
         protected override void AppendData(ByteArrayWriter arrayWriter)
         {
-            arrayWriter.Append(ExeName);
+            arrayWriter.Append(GetStringSize(Process));
+            arrayWriter.Append(Process);
+
+            arrayWriter.Append(GetStringSize(Arguments));
+            arrayWriter.Append(Arguments);
         }
 
         protected override int GetDataSize()
         {
-            return GetStringSize(ExeName);
+            return sizeof(int) + GetStringSize(Process) +
+                   sizeof(int) + GetStringSize(Arguments);
         }
 
         protected override void ReadData(ByteArrayReader arrayReader)
         {
-            ExeName = arrayReader.ReadString();
+            Process   = arrayReader.ReadString(arrayReader.ReadInt());
+            Arguments = arrayReader.ReadString(arrayReader.ReadInt());
         }
     }
 }

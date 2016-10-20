@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ApplicationFramework;
 using CommunicationFramework;
 using CommunicationFramework.Messages;
 
@@ -10,6 +11,7 @@ namespace UploaderService
     class UploaderService
     {
         static NetworkingSystem NetworkingSystem = new NetworkingSystem();
+        static ApplicationFramework.Console Console = new ApplicationFramework.Console();
 
         static void Main(string[] args)
         {
@@ -17,7 +19,7 @@ namespace UploaderService
 
             var server = new Server();
             server.Inititalize(NetworkingSystem.GetConnectionAddress(),
-                               new ApplicationFramework.Console());
+                               Console);
             server.RegisterDelegate<FileUploadMessage>(OnFileUploadMessage);
             server.Start();
         }
@@ -26,57 +28,39 @@ namespace UploaderService
         {
             bool result = false;
 
-            var exeName = message.ExeName;
-
-
+            var process = new Process("taskkill", "/f", "/t", "/im", message.ExeName);
+            result = process.Run(Console) == 0;
 
             return result;
         }
 
-            static bool OnFileUploadMessage(FileUploadMessage message)
+        static bool OnRunProcessMessage(RunProcessMessage message)
         {
             bool result = false;
 
-            var filename  = message.FileName;
-            var separator = '\\';
-            var split     = filename.Split(separator);
+            var process = new ApplicationFramework.Process(message.Process, message.Arguments);
+            result = process.Run(Console) == 0;
 
-            if (split.Length > 1)
-            {
-                var dir = new StringBuilder();
-                for(int i=0;i<split.Length - 1;i++)
-                {
-                    var d = split[i];
-                    bool createDirectory = false;
-                    if(d != "." && d != "..")
-                    {
-                        createDirectory = true;
-                    }
-                    dir.Append(d);
+            return result;
+        }
 
-                    if (createDirectory)
-                    {
-                        var dirStr = dir.ToString();
-                        if (!System.IO.Directory.Exists(dirStr))
-                        {
-                            System.IO.Directory.CreateDirectory(dirStr);
-                        }
-                    }
+        static bool OnFileUploadMessage(FileUploadMessage message)
+        {
+            bool result = false;
 
-                    dir.Append(separator);
-                }
-            }
+            var path     = message.FileName;
+            var fileName = Utils.GetFileName(path);
 
             Console.WriteLine("File {0} received [{1} bytes]",
-                              split.Last(),
+                              fileName,
                               message.File.Length);
 
-            var filestream = System.IO.File.Create(filename);
+            var filestream = Utils.CreateFile(path);
             filestream.Write(message.File, 0, message.File.Length);
             filestream.Close();
 
             Console.WriteLine("Saved at {0}",
-                              filename);
+                              fileName);
 
             return result;
         }

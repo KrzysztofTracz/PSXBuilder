@@ -6,11 +6,10 @@ using System.Text;
 
 namespace ApplicationFramework
 {
-    class Process
+    public class Process
     {
         public String   FileName  { get; protected set; }
         public String[] Arguments { get; protected set; }
-        public ILogger  Logger    { get; protected set; }
 
         public String Output
         {
@@ -21,43 +20,24 @@ namespace ApplicationFramework
         {
             FileName  = fileName;
             Arguments = arguments;
-            Logger    = null;
         }
 
-        public Process(String fileName, ILogger logger, params String[] arguments)
-        {
-            FileName  = fileName;
-            Arguments = arguments;
-            Logger    = logger;
-        }
-
-        public int Run()
+        public int Run(ILogger logger = null)
         {
             int result = -1;
 
             var process = new System.Diagnostics.Process();
-            process.StartInfo.FileName = FileName;
 
-            StringBuilder buffer = new StringBuilder();
-            for(int i=0;i<Arguments.Length;i++)
-            {
-                buffer.Append(Arguments[i]);
-                if(i < Arguments.Length -1)
-                {
-                    buffer.Append(' ');
-                }
-            }
-
-            process.StartInfo.Arguments              = buffer.ToString();
+            process.StartInfo.FileName               = FileName;
+            process.StartInfo.Arguments              = Utils.ConcatArguments(" ", Arguments);
             process.StartInfo.WindowStyle            = ProcessWindowStyle.Hidden;
             process.StartInfo.UseShellExecute        = false;
             process.StartInfo.RedirectStandardOutput = true;
+            process.OutputDataReceived              += CaptureOutput;
 
-            process.OutputDataReceived += CaptureOutput;
-
-            if(Logger != null)
+            if(logger != null)
             {
-                Logger.Log(String.Format("executing: {0} {1}", process.StartInfo.FileName, process.StartInfo.Arguments));
+                logger.Log(String.Format("executing: {0} {1}", process.StartInfo.FileName, process.StartInfo.Arguments));
             }
 
             outputBuffer.Clear();
@@ -66,10 +46,10 @@ namespace ApplicationFramework
             process.WaitForExit();
             result = process.ExitCode;
 
-            if (Logger != null)
+            if (logger != null)
             {
-                Logger.Log(Output);
-                Logger.Log(String.Format("{0} exited with code: {1}", process.StartInfo.FileName, result));
+                logger.Log(Output);
+                logger.Log(String.Format("{0} exited with code: {1}", process.StartInfo.FileName, result));
             }
 
             return result;
