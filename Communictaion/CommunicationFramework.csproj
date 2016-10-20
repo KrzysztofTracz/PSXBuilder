@@ -43,7 +43,6 @@
     <Compile Include="ByteArrayWriter.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="Device.cs" />
-    <Compile Include="IDeviceLog.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="MessageLibrary.cs" />
     <Compile Include="Messages\FileUploadMessage.cs" />
@@ -53,11 +52,18 @@
     <Compile Include="Messages\PartialMessageStart.cs" />
     <Compile Include="Messages\PingMessage.cs" />
     <Compile Include="Messages\PongMessage.cs" />
+    <Compile Include="Messages\RunProcessMessage.cs" />
+    <Compile Include="Messages\TaskKillMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="NetworkingSystem.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ApplicationFramework\ApplicationFramework.csproj">
+      <Project>{c8adcd1b-d1ac-4ecb-b99a-e07e98ec31d7}</Project>
+      <Name>ApplicationFramework</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

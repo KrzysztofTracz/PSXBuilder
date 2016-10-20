@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ApplicationFramework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -31,13 +32,13 @@ namespace CommunicationFramework
             IsInitialized = false;
         }
 
-        public virtual void Inititalize(String address, IDeviceLog log = null)
+        public virtual void Inititalize(String address, ILogger loggger = null)
         {
             InitAddress(address);
             RegisterDelegate<Messages.PartialMessageStart>(OnPartialMessageStart);
             RegisterDelegate<Messages.PingMessage>(OnPingMessage);
             IsInitialized = true;
-            _log = log;
+            _logger = loggger;
         }
 
         public bool StayConnected()
@@ -333,15 +334,15 @@ namespace CommunicationFramework
 
         protected void Log(String text)
         {
-            if(_log != null)
+            if(_logger != null)
             {
-                _log.WriteLine(text);
+                _logger.Log(text);
             }
         }
 
-        private TcpClient       _tcpClient = null;
-        private NetworkStream   _stream    = null;
-        private IDeviceLog      _log       = null;
+        private TcpClient     _tcpClient = null;
+        private NetworkStream _stream    = null;
+        private ILogger       _logger    = null;
 
         private Dictionary<Type, Delegate> messageDelegates = new Dictionary<Type, Delegate>();
     }

@@ -9,6 +9,8 @@ namespace Uploader
 {
     class Uploader
     {
+        const char Separator = '\\';
+
         static NetworkingSystem NetworkingSystem = new NetworkingSystem();
 
         static int Main(string[] args)
@@ -16,33 +18,72 @@ namespace Uploader
             int result = -1; 
             if (args.Length == 3)
             {
-                var separator       = '\\';
                 var ip              = args[0];
                 var path            = args[1];
-                var filename        = path.Split(separator).Last();
-                var file            = System.IO.File.ReadAllBytes(path);
                 var targetDirectory = args[2];
+
+                var filename  = GetFileName(path);
+                var directory = path.Replace(filename, "");
+                
+                if (directory.EndsWith(Separator.ToString()))
+                {
+                    directory = directory.Substring(0, directory.Length - 1);
+                }
 
                 NetworkingSystem.Initialize("14000", ip);
 
                 var client = new Client();
                 client.Inititalize(NetworkingSystem.GetConnectionAddress(),
-                                   new DefaultDeviceLog());
+                                   new ApplicationFramework.Console());
                 client.Connect();
 
-                var message = new FileUploadMessage();
-                message.FileName = targetDirectory + separator + filename;
-                message.File     = file;
+                SendTaskKill(client, filename);
+                SendFile(client, path, targetDirectory);
 
-                Console.WriteLine("Uploading {0} [{1} bytes]",
-                                  path,
-                                  message.File.Length);
+                var dlls = System.IO.Directory.EnumerateFiles(directory, "*.dll");
+                foreach(var dll in dlls)
+                {
+                    SendFile(client, dll, targetDirectory);
+                }
 
-                client.SendMessage(message);
+                SendRunProcess(client, targetDirectory + Separator + filename);
 
                 result = 0;
             }
             return result;
+        }
+
+        static void SendTaskKill(Client client, String exeName)
+        {
+            var message = new TaskKillMessage();
+            message.ExeName = exeName;
+
+            client.SendMessage(message);
+        }
+
+        static void SendFile(Client client, String path, String targetDirectory)
+        {
+            var message = new FileUploadMessage();
+            message.FileName = targetDirectory + Separator + GetFileName(path);
+            message.File     = System.IO.File.ReadAllBytes(path);
+
+            Console.WriteLine("Uploading {0} [{1} bytes]",
+                              path,
+                              message.File.Length);
+
+            client.SendMessage(message);
+        }
+
+        static void SendRunProcess(Client client, String path)
+        {
+            var message = new RunProcessMessage();
+            message.ExeName = path;
+            client.SendMessage(message);
+        }
+
+        static String GetFileName(String path)
+        {
+            return path.Split(Separator).Last();
         }
     }
 }

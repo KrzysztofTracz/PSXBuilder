@@ -17,12 +17,23 @@ namespace UploaderService
 
             var server = new Server();
             server.Inititalize(NetworkingSystem.GetConnectionAddress(),
-                               new DefaultDeviceLog());
+                               new ApplicationFramework.Console());
             server.RegisterDelegate<FileUploadMessage>(OnFileUploadMessage);
             server.Start();
         }
 
-        static bool OnFileUploadMessage(FileUploadMessage message)
+        static bool OnTaskKillMessage(TaskKillMessage message)
+        {
+            bool result = false;
+
+            var exeName = message.ExeName;
+
+
+
+            return result;
+        }
+
+            static bool OnFileUploadMessage(FileUploadMessage message)
         {
             bool result = false;
 

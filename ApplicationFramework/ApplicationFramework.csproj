@@ -41,6 +41,8 @@
   <ItemGroup>
     <Compile Include="Application.cs" />
     <Compile Include="Console.cs" />
+    <Compile Include="ILogger.cs" />
+    <Compile Include="Process.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

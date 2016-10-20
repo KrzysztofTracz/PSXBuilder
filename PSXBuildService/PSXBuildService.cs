@@ -19,7 +19,7 @@ namespace PSXBuildService
 
             var server = new Server();
             server.Inititalize(NetworkingSystem.GetConnectionAddress(),
-                               new CommunicationFramework.DefaultDeviceLog());
+                               new ApplicationFramework.Console());
             server.Start();
         }
     }

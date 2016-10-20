@@ -3,8 +3,13 @@ using System.Text;
 
 namespace ApplicationFramework
 {
-    public class Console
+    public class Console : Logger
     {
+        public override void Log(string text)
+        {
+            WriteLine(GetTimestampedText(text));
+        }
+
         public void Write(String format, params object[] args)
         {
             if (isEmpty)

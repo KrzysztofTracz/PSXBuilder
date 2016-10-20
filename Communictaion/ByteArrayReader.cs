@@ -9,6 +9,11 @@ namespace CommunicationFramework
     {
         public int Cursor { get; protected set; }
 
+        public int BytesLeft
+        {
+            get { return buffer.Length - Cursor; }
+        }
+
         public ByteArrayReader(Byte[] array)
         {
             buffer = array;
@@ -57,9 +62,14 @@ namespace CommunicationFramework
             return sb.ToString();
         }
 
+        public String ReadString()
+        {
+            return ReadString(BytesLeft);
+        }
+
         public Byte[] ReadAll()
         {
-            return Read(buffer.Length - Cursor);
+            return Read(BytesLeft);
         }
 
         protected Byte[] buffer = null;
