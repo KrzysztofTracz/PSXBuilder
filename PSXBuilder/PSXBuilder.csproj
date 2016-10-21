@@ -64,8 +64,6 @@
     <Compile Include="Builder\Builder.cs" />
     <Compile Include="Programs\BuildProgram.cs" />
     <Compile Include="Programs\ConnectionTestProgram.cs" />
-    <Compile Include="Programs\DisplaySettingsProgram.cs" />
-    <Compile Include="Programs\SetupProgram.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PSXBuilder.cs" />

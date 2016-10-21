@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PSXBuilder
+namespace ApplicationFramework
 {
-    class DisplaySettingsProgram : Program<PSXBuilder>
+    class DisplaySettingsProgram : Program<Application>
     {
         public override bool Start(params String[] arguments)
         {
@@ -29,7 +29,7 @@ namespace PSXBuilder
 
         protected override String GetDescription()
         {
-            return "display builder settings";
+            return "display settings";
         }
 
         protected override String GetSpecifier()

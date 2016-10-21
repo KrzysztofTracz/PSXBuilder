@@ -25,6 +25,7 @@ namespace PSXBuilder
         public override void Initialize()
         {
             base.Initialize();
+            InitializePrograms();
             NetworkingSystem.Initialize(BuildMachineAddress);
         }
     }

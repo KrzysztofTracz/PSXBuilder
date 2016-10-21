@@ -113,16 +113,21 @@ namespace ApplicationFramework
 
         protected void InitializePrograms()
         {
-            Programs = new Dictionary<Type, IProgram>();
+            if(Programs == null)
+            {
+                Programs = new Dictionary<Type, IProgram>();
+            }            
 
-            var assembly = Assembly.GetEntryAssembly();
+            var assembly = Assembly.GetCallingAssembly();
             var types    = assembly.GetTypes();
 
             foreach (var type in types)
             {
                 if(type.IsClass && type.IsSubclassOf(typeof(IProgram)))
                 {
-                    if(type.BaseType.GetGenericArguments().Contains(this.GetType()))
+                    var genericArguments = type.BaseType.GetGenericArguments();
+                    if (genericArguments.Contains(this.GetType()) ||
+                        genericArguments.Contains(typeof(Application)))
                     {
                         var contructor = type.GetConstructor(new Type[] { });
                         var program = contructor.Invoke(new object[] { }) as IProgram;
