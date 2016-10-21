@@ -17,7 +17,7 @@ namespace PSXBuilder
 
         public NetworkingSystem NetworkingSystem = new NetworkingSystem();
 
-        public override string GetName()
+        public override String GetName()
         {
             return "PSXBuilder";
         }
@@ -25,7 +25,6 @@ namespace PSXBuilder
         public override void Initialize()
         {
             base.Initialize();
-            InitializePrograms();
             NetworkingSystem.Initialize(BuildMachineAddress);
         }
     }

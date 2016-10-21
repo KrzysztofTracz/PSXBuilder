@@ -10,11 +10,7 @@ namespace PSXBuilder
     {
         static int Main(String[] args)
         {
-            var application = new PSXBuilder();
-
-            application.Initialize();
-
-            return application.Start(args) ? 0 : -1;
+            return Application.Start<PSXBuilder>(args);
         }
     }
 }

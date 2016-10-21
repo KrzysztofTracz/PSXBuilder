@@ -17,6 +17,13 @@ namespace ApplicationFramework
 
         public abstract String GetName();
 
+        public static int Start<T>(String[] arguments) where T : Application, new()
+        {
+            var application = new T();
+            application.Initialize();
+            return application.Start(arguments) ? 0 : -1;
+        }
+
         public Application()
         {
             Name     = GetName();
@@ -29,7 +36,8 @@ namespace ApplicationFramework
             Settings.Initialize(this, Console);
             Settings.Load();
 
-            InitializePrograms();
+            InitializePrograms(Assembly.GetAssembly(typeof(Application)));
+            InitializePrograms(Assembly.GetAssembly(GetType()));
         }
 
         public bool Start(String[] arguments)
@@ -111,14 +119,13 @@ namespace ApplicationFramework
             return result;
         }
 
-        protected void InitializePrograms()
+        protected void InitializePrograms(Assembly assembly)
         {
             if(Programs == null)
             {
                 Programs = new Dictionary<Type, IProgram>();
-            }            
+            }
 
-            var assembly = Assembly.GetCallingAssembly();
             var types    = assembly.GetTypes();
 
             foreach (var type in types)
@@ -129,10 +136,14 @@ namespace ApplicationFramework
                     if (genericArguments.Contains(this.GetType()) ||
                         genericArguments.Contains(typeof(Application)))
                     {
-                        var contructor = type.GetConstructor(new Type[] { });
-                        var program = contructor.Invoke(new object[] { }) as IProgram;
-                        program.Initialize(this);
-                        Programs.Add(type, program);
+                        if (!Programs.ContainsKey(type))
+                        {
+                            var contructor = type.GetConstructor(new Type[] { });
+                            var program = contructor.Invoke(new object[] { }) as IProgram;
+
+                            program.Initialize(this);
+                            Programs.Add(type, program);
+                        }
                     }
                 }
             }

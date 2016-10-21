@@ -31,7 +31,7 @@ namespace ApplicationFramework
 
             for (int i = 0; i < Application.Settings.Count; i++)
             {
-                arguments[i] = Application.Settings[i];
+                arguments[i] = Application.Settings.GetName(i);
             }
 
             return arguments;
