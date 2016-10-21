@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using PSXBuilderNetworking;
+using ApplicationFramework;
 
 namespace PSXBuilder
 {
-    class ConnectionTestProgram : ApplicationFramework.Program<PSXBuilderApplication>
+    class ConnectionTestProgram : Program<PSXBuilder>
     {
         public override bool Start(params String[] arguments)
         {
             bool result = false;
 
             var client = new Client();                        
-            client.Inititalize(PSXBuilder.NetworkingSystem.GetConnectionAddress(),
+            client.Inititalize(Application.NetworkingSystem.GetConnectionAddress(),
                                Application.Console);
             client.Connect();
-            Log("Pinging build machine at {0}...", PSXBuilder.NetworkingSystem.GetConnectionAddress());
+            Log("Pinging build machine at {0}...", Application.NetworkingSystem.GetConnectionAddress());
             result = client.Ping();
             Log(result ? "Success!" : "Fail!");
             client.Disconnect();

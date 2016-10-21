@@ -6,27 +6,30 @@ using System.Text;
 
 namespace ApplicationFramework
 {
-    public class Application
+    public abstract class Application
     {
-        public String  Name    { get; protected set; }
-        public Console Console { get; protected set; }
+        public String  Name { get; protected set; }
+
+        public Console  Console  { get; protected set; }
+        public Settings Settings { get; protected set; }
 
         public Dictionary<Type,IProgram> Programs { get; protected set; }
 
-        public Application(String name)
+        public abstract String GetName();
+
+        public Application()
         {
-            Name      = name;
-            Console   = new Console();
-            _settings = new Settings();
+            Name     = GetName();
+            Console  = new Console();
+            Settings = new Settings();
         }
 
-        public void Initialize()
+        public virtual void Initialize()
         {
+            Settings.Initialize(this, Console);
+            Settings.Load();
+
             InitializePrograms();
-            _settings.Initialize(this, Console);
-            LoadSettings();
-            SaveSettings();
-            LoadSettings();
         }
 
         public bool Start(String[] arguments)
@@ -129,17 +132,5 @@ namespace ApplicationFramework
                 }
             }
         }
-
-        protected bool LoadSettings()
-        {
-            return _settings.Load();
-        }
-
-        protected bool SaveSettings()
-        {
-            return  _settings.Save();
-        }
-
-        private Settings _settings = null;
     }
 }

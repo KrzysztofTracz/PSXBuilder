@@ -1,22 +1,21 @@
-﻿using System;
+﻿using ApplicationFramework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace PSXBuilder
 {
-    class DisplaySettingsProgram : ApplicationFramework.Program<PSXBuilderApplication>
+    class DisplaySettingsProgram : Program<PSXBuilder>
     {
         public override bool Start(params String[] arguments)
         {
-            var settings = Enum.GetValues(typeof(PSXBuilder.Settings)) as PSXBuilder.Settings[];
             Application.Console.PushTab();
-            for (int i = 0; i < settings.Length; i++)
+            for (int i = 0; i < Application.Settings.Count; i++)
             {
-                var settingsName = settings[i].ToString();
                 Application.Console.WriteLine("{0}: {1}",
-                                              settingsName,
-                                              Properties.Settings.Default[settingsName]);
+                                              Application.Settings.GetName(i),
+                                              Application.Settings.GetValue(i));
 
             }
             Application.Console.PopTab();

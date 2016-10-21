@@ -1,34 +1,31 @@
 ﻿using System;
-using System.Net.Sockets;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using ApplicationFramework;
 using PSXBuilderNetworking;
 
 namespace PSXBuilder
 {
-    class PSXBuilder
+    class PSXBuilder : Application
     {
-        public enum Settings
+        [SettingsField(NetworkingSystem.LocalHost)]
+        public String BuildMachineAddress = null;
+
+        [SettingsField("..\\Psyq")]
+        public String SDKPath = null;
+
+        public NetworkingSystem NetworkingSystem = new NetworkingSystem();
+
+        public override string GetName()
         {
-            PSXBuildMachineAddress,
-            PSXSDKPath
+            return "PSXBuilder";
         }
 
-        public static NetworkingSystem NetworkingSystem = new NetworkingSystem();
-
-        public static String GetValue(Settings settings)
+        public override void Initialize()
         {
-            return Properties.Settings.Default[settings.ToString()].ToString();
-        }
-
-        static int Main(String[] args)
-        {
-            NetworkingSystem.Initialize(GetValue(Settings.PSXBuildMachineAddress));
-
-            var application = new PSXBuilderApplication();
-            application.Initialize();
-
-            return application.Start(args) ? 0 : -1;
+            base.Initialize();
+            NetworkingSystem.Initialize(BuildMachineAddress);
         }
     }
 }

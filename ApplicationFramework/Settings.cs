@@ -1,65 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 
 namespace ApplicationFramework
 {
-    public class SettingsField
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public class SettingsFieldAttribute : Attribute
     {
-        public String DefaultValue { get; protected set; }
-        public String Value
-        {
-            get
-            {
-                return value == null ? DefaultValue : value;
-            }
+        public String DefaultValue { get; private set; }
 
-            set
-            {
-                this.value = value;
-            }
-        }
-
-        public SettingsField(String defaultValue)
+        public SettingsFieldAttribute(String defaultValue)
         {
             DefaultValue = defaultValue;
         }
-
-        protected String value = null;
     }
 
     public class Settings
     {
-        public const String SettingsFileName = "Settings.xml";
-        public const String XMLRootElement   = "Settings";
-        public const String XMLIndentChars   = "\t";
-
-        public Dictionary<String, SettingsField> Fields { get; protected set; }
-
-        public Settings()
-        {
-            Fields = null;
-        }
+        public const String SettingsFileNameSuffix = "Settings.xml";
+        public const String XMLRootElement         = "Settings";
+        public const String XMLIndentChars         = "\t";
 
         public virtual void Initialize(object settingsOwner, ILogger logger)
         {
-            this.logger = logger;
+            this.settingsOwner = settingsOwner;
+            this.logger        = logger;
 
-            Fields = new Dictionary<String,SettingsField>();
+            fields = new Dictionary<String,SettingsField>();
 
-            var ownerType = settingsOwner.GetType();
-            var fields    = ownerType.GetFields();
+            var ownerType   = settingsOwner.GetType();
+            var ownerFields = ownerType.GetFields();
 
-            foreach(var field in fields)
+            foreach(var field in ownerFields)
             {
-                if(field.FieldType.Equals(typeof(SettingsField)))
+                if(field.FieldType.Equals(typeof(String)))
                 {
-                    Fields.Add(field.Name,
-                               field.GetValue(settingsOwner) as SettingsField);
+                    var attributes = field.GetCustomAttributes(typeof(SettingsFieldAttribute), true);
+                    if(attributes.Length > 0)
+                    {
+                        var settingsFieldAttribute = attributes[0] as SettingsFieldAttribute;
+                        var settingsField = new SettingsField(field, settingsFieldAttribute.DefaultValue);
+
+                        settingsField.SetValue(settingsField.DefaultValue, settingsOwner);
+
+                        fields.Add(settingsField.Name, settingsField);
+                    }                   
                 }
             }
+        }
+
+        public String GetSettingsFileName()
+        {
+            return String.Format("{0}\\{1}{2}",
+                                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                                 settingsOwner.GetType().Name,
+                                 SettingsFileNameSuffix);
         }
 
         public virtual bool Load()
@@ -70,7 +69,7 @@ namespace ApplicationFramework
 
             try
             {
-                xmlReader = XmlReader.Create(SettingsFileName);
+                xmlReader = XmlReader.Create(GetSettingsFileName());
                 if (xmlReader != null)
                 {
                     while (xmlReader.Read())
@@ -106,7 +105,7 @@ namespace ApplicationFramework
         {
             bool result = false;
 
-            if(Fields.Count > 0)
+            if(Count > 0)
             {
                 XmlWriter xmlWriter = null;
 #if !DEBUG
@@ -117,14 +116,15 @@ namespace ApplicationFramework
                     xmlWriterSettings.Indent      = true;
                     xmlWriterSettings.IndentChars = XMLIndentChars;
 
-                    xmlWriter = XmlWriter.Create(SettingsFileName, xmlWriterSettings);
+                    xmlWriter = XmlWriter.Create(GetSettingsFileName(), xmlWriterSettings);
                     if (xmlWriter != null)
                     {
                         xmlWriter.WriteStartDocument();
                         xmlWriter.WriteStartElement(XMLRootElement);
-                        foreach (var key in Fields.Keys)
+                        for(int i=0;i<Count;i++)
                         {
-                            xmlWriter.WriteElementString(key, Fields[key].Value);
+                            var name = GetName(i);
+                            xmlWriter.WriteElementString(name, GetValue(name));
                         }
                         xmlWriter.WriteEndElement();
                         xmlWriter.WriteEndDocument();
@@ -147,13 +147,116 @@ namespace ApplicationFramework
         public bool SetValue(String name, String value)
         {
             bool result = false;
-            if (Fields.ContainsKey(name))
+            if (fields.ContainsKey(name))
             {
-                Fields[name].Value = value;
+                fields[name].SetValue(value, settingsOwner);
             }
             return result;
         }
 
-        protected ILogger logger = null;
+        public bool SetValue(int index, String value)
+        {
+            bool result = false;
+            var name = GetName(index);
+            if(!String.IsNullOrEmpty(name) && fields.ContainsKey(name))
+            {
+                fields[name].SetValue(value, settingsOwner);
+            }
+            return result;
+        }
+
+        public String GetValue(String name)
+        {
+            String result = null;
+            if (fields.ContainsKey(name))
+            {
+                result = fields[name].GetValue(settingsOwner);
+            }
+            return result;
+        }
+
+        public String GetValue(int index)
+        {
+            String result = null;
+            var name = GetName(index);
+            if (!String.IsNullOrEmpty(name) && fields.ContainsKey(name))
+            {
+                result = fields[name].GetValue(settingsOwner);
+            }
+            return result;
+        }
+
+        public String GetName(int index)
+        {
+            String result = null;
+            if(index < Count)
+            {
+                result = fields.Keys.ElementAt(index);
+            }
+            return result;
+        }
+
+        public String this[String name]
+        {
+            get
+            {
+                return GetValue(name);
+            }
+
+            set
+            {
+                SetValue(name, value);
+            }
+        }
+
+        public String this[int index]
+        {
+            get
+            {
+                return GetValue(GetName(index));
+            }
+
+            set
+            {
+                SetValue(GetName(index), value);
+            }
+        }
+
+        public int Count
+        {
+            get
+            {
+                return fields.Keys.Count;
+            }
+        }
+
+        protected ILogger logger        = null;
+        protected object  settingsOwner = null;
+
+        protected Dictionary<String, SettingsField> fields = null;
+
+        protected class SettingsField
+        {
+            public String Name { get; protected set; }
+            public String DefaultValue { get; protected set; }
+            public FieldInfo FieldInfo { get; protected set; }
+
+            public SettingsField(FieldInfo fieldInfo, String defaultValue)
+            {
+                DefaultValue = defaultValue;
+                FieldInfo = fieldInfo;
+                Name = fieldInfo.Name;
+            }
+
+            public void SetValue(String value, object fieldOwner)
+            {
+                FieldInfo.SetValue(fieldOwner, value);
+            }
+
+            public String GetValue(object fieldOwner)
+            {
+                return FieldInfo.GetValue(fieldOwner) as String;
+            }
+        }
     }
 }

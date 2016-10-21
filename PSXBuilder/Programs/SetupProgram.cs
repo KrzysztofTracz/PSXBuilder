@@ -1,24 +1,24 @@
-﻿using System;
+﻿using ApplicationFramework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace PSXBuilder
 {
-    class SetupProgram : ApplicationFramework.Program<PSXBuilderApplication>
+    class SetupProgram : Program<PSXBuilder>
     {
         public override bool Start(params String[] arguments)
         {
             bool result = false;
 
-            var settings = Enum.GetValues(typeof(PSXBuilder.Settings)) as PSXBuilder.Settings[];
-            if (arguments.Length == settings.Length)
+            if (arguments.Length == Application.Settings.Count)
             {
-                for (int i = 0; i < settings.Length; i++)
+                for (int i = 0; i < Application.Settings.Count; i++)
                 {
-                    Properties.Settings.Default[settings[i].ToString()] = arguments[i];
+                    Application.Settings[i] = arguments[i];
                 }
-                Properties.Settings.Default.Save();
+                Application.Settings.Save();
                 result = true;
             }
 
@@ -27,12 +27,11 @@ namespace PSXBuilder
 
         protected override String[] GetArguments()
         {
-            var settings  = Enum.GetValues(typeof(PSXBuilder.Settings)) as PSXBuilder.Settings[];
-            var arguments = new String[settings.Length];
+            var arguments = new String[Application.Settings.Count];
 
-            for (int i = 0; i < settings.Length; i++)
+            for (int i = 0; i < Application.Settings.Count; i++)
             {
-                arguments[i] = settings[i].ToString();
+                arguments[i] = Application.Settings[i];
             }
 
             return arguments;
