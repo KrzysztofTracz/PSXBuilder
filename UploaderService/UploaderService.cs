@@ -55,16 +55,16 @@ namespace UploaderService
             var path     = message.FileName;
             var fileName = Utils.GetFileName(path);
 
-            Console.WriteLine("File {0} received [{1} bytes]",
-                              fileName,
-                              message.File.Length);
+            Console.Log("File {0} received [{1} bytes]",
+                        fileName,
+                        message.File.Length);
 
             var filestream = Utils.CreateFile(path);
             filestream.Write(message.File, 0, message.File.Length);
             filestream.Close();
 
-            Console.WriteLine("Saved at {0}",
-                              path);
+            Console.Log("Saved at {0}",
+                        path);
 
             return result;
         }

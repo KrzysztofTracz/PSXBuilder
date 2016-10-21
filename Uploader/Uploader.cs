@@ -12,6 +12,7 @@ namespace Uploader
         const char Separator = '\\';
 
         static NetworkingSystem NetworkingSystem = new NetworkingSystem();
+        static ApplicationFramework.Console Console = new ApplicationFramework.Console();
 
         static int Main(string[] args)
         {
@@ -34,7 +35,7 @@ namespace Uploader
 
                 var client = new Client();
                 client.Inititalize(NetworkingSystem.GetConnectionAddress(),
-                                   new ApplicationFramework.Console());
+                                   Console);
                 client.Connect();
 
                 SendTaskKill(client, filename);
@@ -69,9 +70,9 @@ namespace Uploader
             message.FileName = targetDirectory + Separator + GetFileName(path);
             message.File     = System.IO.File.ReadAllBytes(path);
 
-            Console.WriteLine("Uploading {0} [{1} bytes]",
-                              path,
-                              message.File.Length);
+            Console.Log("Uploading {0} [{1} bytes]",
+                        path,
+                        message.File.Length);
 
             client.SendMessage(message);
         }
