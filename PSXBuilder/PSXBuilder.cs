@@ -25,10 +25,10 @@ namespace PSXBuilder
         {
             NetworkingSystem.Initialize(GetValue(Settings.PSXBuildMachineAddress));
 
-            var application = new Application("PSXBuilder");
-            var result = application.Start(args);
+            var application = new PSXBuilderApplication();
+            application.Initialize();
 
-            return result ? 0 : -1;
+            return application.Start(args) ? 0 : -1;
         }
     }
 }

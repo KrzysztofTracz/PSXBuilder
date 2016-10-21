@@ -6,7 +6,7 @@ using PSXBuilderNetworking;
 
 namespace PSXBuilder
 {
-    class ConnectionTestProgram : ApplicationFramework.Program
+    class ConnectionTestProgram : ApplicationFramework.Program<PSXBuilderApplication>
     {
         public override bool Start(params String[] arguments)
         {
@@ -16,9 +16,9 @@ namespace PSXBuilder
             client.Inititalize(PSXBuilder.NetworkingSystem.GetConnectionAddress(),
                                Application.Console);
             client.Connect();
-            Application.Console.WriteLine("Pinging build machine at {0}...", PSXBuilder.NetworkingSystem.GetConnectionAddress());
+            Log("Pinging build machine at {0}...", PSXBuilder.NetworkingSystem.GetConnectionAddress());
             result = client.Ping();
-            Application.Console.WriteLine(result ? "Success!" : "Fail!");
+            Log(result ? "Success!" : "Fail!");
             client.Disconnect();
 
             return result;

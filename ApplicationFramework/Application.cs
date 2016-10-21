@@ -11,13 +11,22 @@ namespace ApplicationFramework
         public String  Name    { get; protected set; }
         public Console Console { get; protected set; }
 
-        public Dictionary<Type,Program> Programs { get; protected set; }
+        public Dictionary<Type,IProgram> Programs { get; protected set; }
 
         public Application(String name)
         {
+            Name      = name;
+            Console   = new Console();
+            _settings = new Settings();
+        }
+
+        public void Initialize()
+        {
             InitializePrograms();
-            Name    = name;
-            Console = new Console();
+            _settings.Initialize(this, Console);
+            LoadSettings();
+            SaveSettings();
+            LoadSettings();
         }
 
         public bool Start(String[] arguments)
@@ -75,7 +84,7 @@ namespace ApplicationFramework
             Console.PopTab();
         }
 
-        public T  Program<T>() where T : Program
+        public T  Program<T>() where T : IProgram
         {
             T result = null;
 
@@ -101,21 +110,36 @@ namespace ApplicationFramework
 
         protected void InitializePrograms()
         {
-            Programs = new Dictionary<Type, Program>();
+            Programs = new Dictionary<Type, IProgram>();
 
             var assembly = Assembly.GetEntryAssembly();
             var types    = assembly.GetTypes();
 
             foreach (var type in types)
             {
-                if(type.IsClass && type.IsSubclassOf(typeof(Program)))
+                if(type.IsClass && type.IsSubclassOf(typeof(IProgram)))
                 {
-                    var contructor = type.GetConstructor(new Type[] { });
-                    var program = contructor.Invoke(new object[] { }) as Program;
-                    program.Initialize(this);
-                    Programs.Add(type, program);
+                    if(type.BaseType.GetGenericArguments().Contains(this.GetType()))
+                    {
+                        var contructor = type.GetConstructor(new Type[] { });
+                        var program = contructor.Invoke(new object[] { }) as IProgram;
+                        program.Initialize(this);
+                        Programs.Add(type, program);
+                    }
                 }
             }
         }
+
+        protected bool LoadSettings()
+        {
+            return _settings.Load();
+        }
+
+        protected bool SaveSettings()
+        {
+            return  _settings.Save();
+        }
+
+        private Settings _settings = null;
     }
 }

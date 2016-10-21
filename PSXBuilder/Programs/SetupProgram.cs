@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PSXBuilder
 {
-    class SetupProgram : ApplicationFramework.Program
+    class SetupProgram : ApplicationFramework.Program<PSXBuilderApplication>
     {
         public override bool Start(params String[] arguments)
         {

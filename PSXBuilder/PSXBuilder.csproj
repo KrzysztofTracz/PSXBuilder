@@ -73,6 +73,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="PSXBuilderApplication.cs" />
     <Compile Include="PSXProject.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>

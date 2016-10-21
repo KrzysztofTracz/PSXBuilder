@@ -6,12 +6,14 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using PSXBuilderNetworking;
+using ApplicationFramework;
 
 namespace PSXBuildService
 {
     class PSXBuildService
     {
-        static NetworkingSystem NetworkingSystem = new NetworkingSystem();
+        static NetworkingSystem NetworkingSystem    = new NetworkingSystem();
+        static ApplicationFramework.Console Console = new ApplicationFramework.Console();
 
         static void Main(string[] args)
         {
@@ -19,7 +21,7 @@ namespace PSXBuildService
 
             var server = new Server();
             server.Inititalize(NetworkingSystem.GetConnectionAddress(),
-                               new ApplicationFramework.Console());
+                               Console);
             server.Start();
         }
     }
