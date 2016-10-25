@@ -10,19 +10,33 @@ using ApplicationFramework;
 
 namespace PSXBuildService
 {
-    class PSXBuildService
+    class PSXBuildService : Application
     {
-        static NetworkingSystem NetworkingSystem    = new NetworkingSystem();
-        static ApplicationFramework.Console Console = new ApplicationFramework.Console();
+        [SettingsField(NetworkingSystem.LocalHost)]
+        public String BuildMachineAddress = null;
 
-        static void Main(string[] args)
+        [SettingsField("C:\\Psyq")]
+        public String SDKPath = null;
+
+        [SettingsField("C:\\Psyq\\projects")]
+        public String ProjectsPath = null;
+
+        public NetworkingSystem NetworkingSystem = new NetworkingSystem();
+
+        public override string GetName()
         {
-            NetworkingSystem.Initialize();
+            return "PSXBuildService";
+        }
 
-            var server = new Server();
-            server.Inititalize(NetworkingSystem.GetConnectionAddress(),
-                               Console);
-            server.Start();
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            BuildMachineAddress = NetworkingSystem.GetLocalIPAddress();
+            Settings.Load();
+            Settings.Save();
+
+            NetworkingSystem.Initialize(BuildMachineAddress);
         }
     }
 }

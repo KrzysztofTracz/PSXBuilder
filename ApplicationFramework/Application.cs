@@ -13,7 +13,8 @@ namespace ApplicationFramework
         public Console  Console  { get; protected set; }
         public Settings Settings { get; protected set; }
 
-        public Dictionary<Type,IProgram> Programs { get; protected set; }
+        public Dictionary<Type,IProgram> Programs       { get; protected set; }
+        public IProgram                  DefaultProgram { get; protected set; }
 
         public abstract String GetName();
 
@@ -29,6 +30,8 @@ namespace ApplicationFramework
             Name     = GetName();
             Console  = new Console();
             Settings = new Settings();
+
+            DefaultProgram = null;
         }
 
         public virtual void Initialize()
@@ -66,6 +69,10 @@ namespace ApplicationFramework
                         break;
                     }
                 }
+            }
+            else if(DefaultProgram != null)
+            {
+                DefaultProgram.Start();
             }
 
             if(displayHelp)
@@ -126,7 +133,7 @@ namespace ApplicationFramework
                 Programs = new Dictionary<Type, IProgram>();
             }
 
-            var types    = assembly.GetTypes();
+            var types = assembly.GetTypes();
 
             foreach (var type in types)
             {
@@ -139,10 +146,16 @@ namespace ApplicationFramework
                         if (!Programs.ContainsKey(type))
                         {
                             var contructor = type.GetConstructor(new Type[] { });
-                            var program = contructor.Invoke(new object[] { }) as IProgram;
+                            var program    = contructor.Invoke(new object[] { }) as IProgram;
 
                             program.Initialize(this);
                             Programs.Add(type, program);
+
+                            if(String.IsNullOrEmpty(program.Specifier) && 
+                               program.Arguments.Length == 0)
+                            {
+                                DefaultProgram = program;
+                            }
                         }
                     }
                 }

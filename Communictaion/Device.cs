@@ -93,6 +93,11 @@ namespace CommunicationFramework
                 Message message = ReadMessageFromStream();
                 while (message != null)
                 {
+                    if (message.GetType().Equals(typeof(Messages.PartialMessageStart)))
+                    {
+                        message = DispatchPartialMessage(message as Messages.PartialMessageStart);
+                    }
+
                     if (message.GetType().Equals(typeof(T)))
                     {
                         result = message as T;
@@ -265,13 +270,13 @@ namespace CommunicationFramework
             return true;
         }
 
-        protected virtual bool OnPartialMessageStart(Messages.PartialMessageStart message)
+        protected virtual Message DispatchPartialMessage(Messages.PartialMessageStart message)
         {
 #if !DEBUG
             var l = _logger;
             _logger = null;
 #endif
-            int parts  = message.Parts;
+            int parts = message.Parts;
             var buffer = new Byte[message.TotalSize];
             int cursor = 0;
 
@@ -281,10 +286,10 @@ namespace CommunicationFramework
 
             SendSingleMessage(new Messages.PartialMessageReceived());
 
-            for(int part=0;part<parts;part++)
+            for (int part = 0; part < parts; part++)
             {
                 var partialMessage = WaitForMessage<Messages.PartialMessage>();
-                for(int i=0;i<partialMessage.Data.Length;i++,cursor++)
+                for (int i = 0; i < partialMessage.Data.Length; i++, cursor++)
                 {
                     buffer[cursor] = partialMessage.Data[i];
                 }
@@ -301,6 +306,12 @@ namespace CommunicationFramework
 #if !DEBUG
             _logger = l;
 #endif
+            return receivedMessage;
+        }
+
+        protected virtual bool OnPartialMessageStart(Messages.PartialMessageStart message)
+        {
+            var receivedMessage = DispatchPartialMessage(message);
             return InvokeMessageDelegate(receivedMessage);
         }
 
@@ -354,6 +365,14 @@ namespace CommunicationFramework
             if(!messageDelegates.ContainsKey(typeof(T)))
             {
                 messageDelegates.Add(typeof(T), onMessage);
+            }
+        }
+
+        public void UnregisterDelegate<T>() where T : Message
+        {
+            if (!messageDelegates.ContainsKey(typeof(T)))
+            {
+                messageDelegates.Remove(typeof(T));
             }
         }
 

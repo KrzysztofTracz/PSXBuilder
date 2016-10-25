@@ -26,6 +26,7 @@ namespace PSXBuilder
         {
             base.Initialize();
             NetworkingSystem.Initialize(BuildMachineAddress);
+            Settings.Save();
         }
     }
 }

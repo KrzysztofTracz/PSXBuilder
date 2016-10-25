@@ -45,6 +45,8 @@
     <Compile Include="Device.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="MessageLibrary.cs" />
+    <Compile Include="Messages\CheckFileMessage.cs" />
+    <Compile Include="Messages\CheckFileResultMessage.cs" />
     <Compile Include="Messages\ClosingConnectionMessage.cs" />
     <Compile Include="Messages\ConnectionClosedMessage.cs" />
     <Compile Include="Messages\FileUploadMessage.cs" />
@@ -54,6 +56,7 @@
     <Compile Include="Messages\PartialMessageStart.cs" />
     <Compile Include="Messages\PingMessage.cs" />
     <Compile Include="Messages\PongMessage.cs" />
+    <Compile Include="Messages\ProcessResultMessage.cs" />
     <Compile Include="Messages\RunProcessMessage.cs" />
     <Compile Include="Messages\TaskKillMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

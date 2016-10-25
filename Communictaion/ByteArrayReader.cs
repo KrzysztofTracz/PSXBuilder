@@ -46,9 +46,19 @@ namespace CommunicationFramework
             return result;
         }
 
+        public bool ReadBool()
+        {
+            return BitConverter.ToBoolean(Read(sizeof(bool)), 0);
+        }
+
         public int ReadInt()
         {
             return BitConverter.ToInt32(Read(sizeof(int)), 0);
+        }
+
+        public long ReadLong()
+        {
+            return BitConverter.ToInt64(Read(sizeof(long)), 0);
         }
 
         public String ReadString(int size)

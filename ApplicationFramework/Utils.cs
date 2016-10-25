@@ -38,7 +38,9 @@ namespace ApplicationFramework
                 {
                     var d = split[i];
                     bool createDirectory = false;
-                    if (d != "." && d != "..")
+                    if (d != "."  && 
+                        d != ".." &&
+                        !IsDrive(d))
                     {
                         createDirectory = true;
                     }
@@ -73,6 +75,28 @@ namespace ApplicationFramework
                 result = result.Replace(unacceptableCharacter, '-');
             }
             return result;
+        }
+
+        public static String ConvertPathToLocal(String path, String root)
+        {
+            var result = path.Replace(root, "");
+
+            if (result.StartsWith(DirectorySeparator.ToString()))
+            {
+                result = result.Substring(1, result.Length - 1);
+            }
+
+            return result;
+        }
+
+        public static bool IsDrive(String directory)
+        {
+            return directory.EndsWith(":");
+        }
+
+        public static String Path(params String[] elements)
+        {
+            return ConcatArguments(DirectorySeparator.ToString(), elements);
         }
 
         public const char DirectorySeparator = '\\';

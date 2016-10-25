@@ -7,9 +7,8 @@ namespace ApplicationFramework
     {
         public override void Log(string text)
         {
-            var timestampedText = GetTimestampedText(text);
-            WriteLine(timestampedText);
-            WriteLineToFile(timestampedText);
+            base.Log(text);
+            WriteLine(text);
         }
 
         public void Write(String format, params object[] args)

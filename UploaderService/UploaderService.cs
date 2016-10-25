@@ -25,7 +25,19 @@ namespace UploaderService
             server.RegisterDelegate<RunProcessMessage>(OnRunProcessMessage);
             server.RegisterDelegate<FileUploadMessage>(OnFileUploadMessage);
 
-            server.Start();
+            try
+            {
+                server.Start();
+            }
+            catch(Exception e)
+            {
+                while(e != null)
+                {
+                    Console.Log(e.Message);
+                    Console.Log(e.StackTrace);
+                    e = e.InnerException;
+                }
+            }
         }
 
         static bool OnTaskKillMessage(TaskKillMessage message)

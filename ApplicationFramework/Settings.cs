@@ -237,15 +237,15 @@ namespace ApplicationFramework
 
         protected class SettingsField
         {
-            public String Name { get; protected set; }
-            public String DefaultValue { get; protected set; }
-            public FieldInfo FieldInfo { get; protected set; }
+            public String    Name         { get; protected set; }
+            public String    DefaultValue { get; protected set; }
+            public FieldInfo FieldInfo    { get; protected set; }
 
             public SettingsField(FieldInfo fieldInfo, String defaultValue)
             {
                 DefaultValue = defaultValue;
-                FieldInfo = fieldInfo;
-                Name = fieldInfo.Name;
+                FieldInfo    = fieldInfo;
+                Name         = fieldInfo.Name;
             }
 
             public void SetValue(String value, object fieldOwner)

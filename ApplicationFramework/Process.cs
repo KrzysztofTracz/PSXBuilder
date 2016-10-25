@@ -13,7 +13,7 @@ namespace ApplicationFramework
 
         public bool IsOutputEmpty
         {
-            get { return outputBuffer.Length > 0; }
+            get { return outputBuffer.Length == 0; }
         }
 
         public String Output

@@ -42,7 +42,17 @@ namespace CommunicationFramework
             }
         }
 
+        public void Append(bool value)
+        {
+            Append(BitConverter.GetBytes(value));
+        }
+
         public void Append(int value)
+        {
+            Append(BitConverter.GetBytes(value));
+        }
+
+        public void Append(long value)
         {
             Append(BitConverter.GetBytes(value));
         }
