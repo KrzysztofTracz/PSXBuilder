@@ -30,12 +30,7 @@ namespace PSXBuildService.Programs
             }
             catch (Exception e)
             {
-                while (e != null)
-                {
-                    Log(e.Message);
-                    Log(e.StackTrace);
-                    e = e.InnerException;
-                }
+                Application.Console.Log(e);
                 result = false;
             }
 

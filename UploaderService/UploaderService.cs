@@ -13,21 +13,23 @@ namespace UploaderService
         static NetworkingSystem NetworkingSystem = new NetworkingSystem();
         static ApplicationFramework.Console Console = new ApplicationFramework.Console();
 
+        static Server Server = null;
+
         static void Main(string[] args)
         {
             NetworkingSystem.Initialize("14000");
 
-            var server = new Server();
-            server.Inititalize(NetworkingSystem.GetConnectionAddress(),
+            Server = new Server();
+            Server.Inititalize(NetworkingSystem.GetConnectionAddress(),
                                Console);
 
-            server.RegisterDelegate<TaskKillMessage>(OnTaskKillMessage);
-            server.RegisterDelegate<RunProcessMessage>(OnRunProcessMessage);
-            server.RegisterDelegate<FileUploadMessage>(OnFileUploadMessage);
+            Server.RegisterDelegate<TaskKillMessage>(OnTaskKillMessage);
+            Server.RegisterDelegate<RunProcessMessage>(OnRunProcessMessage);
+            Server.RegisterDelegate<FileUploadMessage>(OnFileUploadMessage);
 
             try
             {
-                server.Start();
+                Server.Start();
             }
             catch(Exception e)
             {
@@ -46,6 +48,8 @@ namespace UploaderService
 
             var process = new Process("taskkill", "/f", "/t", "/im", message.ExeName);
             result = process.Run(Console) == 0;
+
+            Server.SendMessage(new TaskKilledMessage());
 
             return result;
         }

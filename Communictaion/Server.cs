@@ -10,7 +10,7 @@ namespace CommunicationFramework
             _server = new TcpListener(IPAdress, Port);
             _server.Start();
 
-            Log("Starting server at {0}:{1}.", IPAdress, Port);
+            Logger.Log("Starting server at {0}:{1}.", IPAdress, Port);
 
             while (true)
             {
@@ -23,7 +23,10 @@ namespace CommunicationFramework
                         Thread.Sleep(100);
                     }
                 }
-                catch (System.IO.IOException) { }
+                catch (System.Exception e)
+                {
+                    Logger.Log(e);
+                }
                 finally
                 {
                     CloseConnection();

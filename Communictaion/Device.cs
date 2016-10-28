@@ -15,6 +15,8 @@ namespace CommunicationFramework
 
         public bool IsInitialized { get; protected set; }
 
+        public ILogger Logger { get; protected set; }
+
         public bool IsConnected
         {
             get
@@ -32,14 +34,14 @@ namespace CommunicationFramework
             IsInitialized = false;
         }
 
-        public virtual void Inititalize(String address, ILogger loggger = null)
+        public virtual void Inititalize(String address, ILogger loggger)
         {
             InitAddress(address);
             RegisterDelegate<Messages.PartialMessageStart>(OnPartialMessageStart);
             RegisterDelegate<Messages.PingMessage>(OnPingMessage);
             RegisterDelegate<Messages.ClosingConnectionMessage>(OnClosingConnectionMessage);
             IsInitialized = true;
-            _logger = loggger;
+            Logger = loggger;
         }
 
         public bool StayConnected()
@@ -47,8 +49,12 @@ namespace CommunicationFramework
             bool result = true;
             if(IsConnected)
             {
-                SendSingleMessage(new Messages.HeartbeatMessage());
-                _tcpClient.Client.Poll(0, SelectMode.SelectRead);
+                try
+                {
+                    SendSingleMessage(new Messages.HeartbeatMessage());
+                    _tcpClient.Client.Poll(0, SelectMode.SelectRead);
+                }
+                catch { }
             }
 
             if(!IsConnected)
@@ -72,11 +78,12 @@ namespace CommunicationFramework
 
         public bool WaitForMessage()
         {
-            Log("Waiting for message.");
+            Logger.Log(Verbosity.Debug, "Waiting for message.");
             bool result = false;
             if (IsInitialized)
             {
                 var message = ReadMessageFromStream();
+                if(message != null)
                 {
                     result = InvokeMessageDelegate(message);
                 }
@@ -86,7 +93,8 @@ namespace CommunicationFramework
 
         public T WaitForMessage<T>() where T : Message
         {
-            Log("Waiting for {0}.", typeof(T).Name);
+            Logger.Log(Verbosity.Debug, "Waiting for {0}.", typeof(T).Name);
+
             T result = null;
             if (IsInitialized)
             {
@@ -151,22 +159,33 @@ namespace CommunicationFramework
             Message result = null;
             if (IsConnected)
             {
-                Byte[] headerBuffer = new Byte[Message.GetHeaderSize()];
-                _stream.Read(headerBuffer, 0, headerBuffer.Length);
-
-                Byte messageID = headerBuffer[0];
-                int messageSize = BitConverter.ToInt32(headerBuffer, 1) - Message.GetHeaderSize();
-
-                result = Message.Library.GetMessageByID(messageID);
-
-                if (messageSize > 0)
+                bool exit = false;
+                Byte[] headerBuffer = new Byte[Message.GetHeaderSize()];                
+                try
                 {
-                    Byte[] messageDataBuffer = new byte[messageSize];
-                    _stream.Read(messageDataBuffer, 0, messageDataBuffer.Length);
-                    result.FromByteArray(messageDataBuffer);
+                    _stream.Read(headerBuffer, 0, headerBuffer.Length);
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(Verbosity.Debug, e);
+                    exit = true;
                 }
 
-                Log("{0} received.", result.GetName());
+                if (!exit)
+                {
+                    Byte messageID = headerBuffer[0];
+                    int messageSize = BitConverter.ToInt32(headerBuffer, 1) - Message.GetHeaderSize();
+
+                    result = Message.Library.GetMessageByID(messageID);
+
+                    if (messageSize > 0)
+                    {
+                        Byte[] messageDataBuffer = new byte[messageSize];
+                        _stream.Read(messageDataBuffer, 0, messageDataBuffer.Length);
+                        result.FromByteArray(messageDataBuffer);
+                    }
+                    Logger.Log(Verbosity.Debug, "{0} received.", result.GetName());
+                }
             }
             return result;
         }
@@ -181,7 +200,7 @@ namespace CommunicationFramework
 
                 result = Message.Library.GetMessageByID(messageID);
 
-                Byte[] messageDataBuffer = new byte[messageSize];
+                Byte[] messageDataBuffer = new byte[messageSize - Message.GetHeaderSize()];
                 for(int i = Message.GetHeaderSize(); i < buffer.Length; i++)
                 {
                     messageDataBuffer[i - Message.GetHeaderSize()] = buffer[i];
@@ -221,30 +240,24 @@ namespace CommunicationFramework
             if (IsConnected)
             {
                 PartialMessageDataBuffer = message.ToByteArray();
-                int parts = (PartialMessageDataBuffer.Length / Message.SizeLimit) + 1;
+                int parts = PartialMessageDataBuffer.Length / Message.SizeLimit;
+                parts += (PartialMessageDataBuffer.Length % Message.SizeLimit) > 0 ? 1 : 0;
 
                 var partialMessageStart = new Messages.PartialMessageStart();
                 partialMessageStart.Parts     = parts;
                 partialMessageStart.TotalSize = PartialMessageDataBuffer.Length;
 
-                Log("Sending {0} in {1} parts [{2} bytes]",
-                                 message.GetName(),
-                                 partialMessageStart.Parts,
-                                 partialMessageStart.TotalSize);
-
-#if !DEBUG
-                var l = _logger;
-                _logger = null;
-#endif
+                Logger.Log(Verbosity.Debug, "Sending {0} in {1} parts [{2} bytes]",
+                                             message.GetName(),
+                                             partialMessageStart.Parts,
+                                             partialMessageStart.TotalSize);
 
                 SendSingleMessage(partialMessageStart);
                 WaitForMessage<Messages.PartialMessageReceived>();
 
                 while (PartialMessageDataBuffer.Length > 0)
                 {
-
-                    Log("{0} bytes left",
-                        PartialMessageDataBuffer.Length);
+                    Logger.Log(Verbosity.Debug, "{0} bytes left", PartialMessageDataBuffer.Length);
 
                     var partialMessage = new Messages.PartialMessage();
                     partialMessage.Data = GetPartialMessageDataFromBuffer();
@@ -252,10 +265,6 @@ namespace CommunicationFramework
                     WaitForMessage<Messages.PartialMessageReceived>();
                 }
                 result = true;
-
-#if !DEBUG
-                _logger = l;
-#endif
             }
             return result;
         }
@@ -264,7 +273,7 @@ namespace CommunicationFramework
         {
             if (IsConnected)
             {
-                Log("Sending {0}", message.GetName());
+                Logger.Log(Verbosity.Debug, "Sending {0}", message.GetName());
                 _stream.Write(message.ToByteArray(), 0, message.Size);
             }
             return true;
@@ -272,17 +281,13 @@ namespace CommunicationFramework
 
         protected virtual Message DispatchPartialMessage(Messages.PartialMessageStart message)
         {
-#if !DEBUG
-            var l = _logger;
-            _logger = null;
-#endif
             int parts = message.Parts;
             var buffer = new Byte[message.TotalSize];
             int cursor = 0;
 
-            Log("Receiving message in {0} parts [{1} bytes]",
-                message.Parts,
-                message.TotalSize);
+            Logger.Log(Verbosity.Debug, "Receiving message in {0} parts [{1} bytes]",
+                                        message.Parts,
+                                        message.TotalSize);
 
             SendSingleMessage(new Messages.PartialMessageReceived());
 
@@ -294,18 +299,17 @@ namespace CommunicationFramework
                     buffer[cursor] = partialMessage.Data[i];
                 }
 
-                Log("{0} parts received [{1} bytes]",
-                                 part + 1,
-                                 cursor);
+                Logger.Log(Verbosity.Debug, "{0} parts received [{1} bytes]",
+                                             part + 1,
+                                             cursor);
 
                 SendSingleMessage(new Messages.PartialMessageReceived());
             }
 
             var receivedMessage = GetMessageFromBuffer(buffer);
-            Log("{0} received.", receivedMessage.GetName());
-#if !DEBUG
-            _logger = l;
-#endif
+
+            Logger.Log(Verbosity.Debug, "{0} received.", receivedMessage.GetName());
+
             return receivedMessage;
         }
 
@@ -317,7 +321,7 @@ namespace CommunicationFramework
 
         protected bool OpenConnection(TcpClient client)
         {
-            Log("Opening connection.");
+            Logger.Log("Opening connection.");
             _tcpClient  = client;
             _stream     = _tcpClient.GetStream();
             return true;
@@ -325,7 +329,11 @@ namespace CommunicationFramework
 
         protected bool CloseConnection()
         {
-            Log("Closing connection.");
+            if (IsConnected || _stream != null || _tcpClient != null)
+            {
+                Logger.Log("Closing connection.");
+            }
+
             if(IsConnected)
             {
                 SendMessage(new Messages.ClosingConnectionMessage());
@@ -376,19 +384,6 @@ namespace CommunicationFramework
             }
         }
 
-        protected void Log(String format, params object[] objects)
-        {
-            Log(String.Format(format, objects));
-        }
-
-        protected void Log(String text)
-        {
-            if(_logger != null)
-            {
-                _logger.Log(text);
-            }
-        }
-
         public virtual void Dispose()
         {
             CloseConnection();
@@ -396,7 +391,6 @@ namespace CommunicationFramework
 
         private TcpClient     _tcpClient = null;
         private NetworkStream _stream    = null;
-        private ILogger       _logger    = null;
 
         private Dictionary<Type, Delegate> messageDelegates = new Dictionary<Type, Delegate>();
     }

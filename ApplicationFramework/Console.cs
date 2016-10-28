@@ -5,10 +5,13 @@ namespace ApplicationFramework
 {
     public class Console : Logger
     {
-        public override void Log(string text)
+        public override void Log(Verbosity verbosity, string text)
         {
-            base.Log(text);
-            WriteLine(text);
+            base.Log(verbosity, text);
+            if(verbosity >= Verbosity)
+            {
+                WriteLine(text);
+            }            
         }
 
         public void Write(String format, params object[] args)

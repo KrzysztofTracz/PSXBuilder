@@ -20,6 +20,11 @@ namespace CommunicationFramework
             Cursor = 0;
         }
 
+        public bool IsEmpty()
+        {
+            return BytesLeft == 0;
+        }
+
         public Byte Read()
         {
             Byte result = 0;

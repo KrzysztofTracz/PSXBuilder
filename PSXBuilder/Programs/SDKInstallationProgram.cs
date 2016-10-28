@@ -11,8 +11,6 @@ namespace PSXBuilder.Programs
 {
     class SDKInstallationProgram : Program<PSXBuilder>
     {
-        public const String SetupScript = "PSPATHS.bat";
-
         public override bool Start(params String[] arguments)
         {
             var client = new PSXBuilderNetworking.Client();
@@ -28,6 +26,8 @@ namespace PSXBuilder.Programs
                                            "*",
                                            SearchOption.AllDirectories);
 
+            var checkFilesMessage = new CheckFilesMessage();
+
             for (int i = 0; i < files.Length; i++)
             {
                 var file = files[i];
@@ -36,36 +36,34 @@ namespace PSXBuilder.Programs
                                                         Application.SDKPath);
                 var fileSize = new FileInfo(file).Length;
 
-                var checkFileMessage = new CheckFileMessage();
-                checkFileMessage.Path = fileName;
-                checkFileMessage.FileSize = fileSize;
-
-                client.SendMessage(checkFileMessage);
-                var checkFileResultMessage = client.WaitForMessage<CheckFileResultMessage>();
-
-                if (!checkFileResultMessage.Result)
-                {
-                    var message = new FileUploadMessage();
-
-                    message.File = File.ReadAllBytes(file);
-                    message.FileName = Utils.ConvertPathToLocal(file,
-                                                                Application.SDKPath);
-
-                    Log("Uploading file {0} [{1}/{2}]", message.FileName, i + 1, files.Length);
-
-                    client.SendMessage(message);
-                }
+                checkFilesMessage.Files.Add(fileName, fileSize);
             }
 
-            client.SendMessage(new GetSDKPathMessage());
-            var sdkPathMessage = client.WaitForMessage<SDKPathMessage>();
+            Log("Checking installed files.");
+            client.SendMessage(checkFilesMessage);
+            var filesToUploadMessage = client.WaitForMessage<FileListMessage>();
 
-            client.SendMessage(new RunProcessMessage(Utils.Path(sdkPathMessage.Path, SetupScript), true));
-            var processResultMessage = client.WaitForMessage<ProcessResultMessage>();
-            Log(processResultMessage.Output);
+            for(int i=0;i<filesToUploadMessage.Files.Count;i++)
+            {
+                var file = filesToUploadMessage.Files[i];
+
+                var message = new FileUploadMessage();
+
+                message.File     = File.ReadAllBytes(Utils.Path(Application.SDKPath, file));
+                message.FileName = file;
+
+                var installationProgress = (((float)(i + 1))/(float)filesToUploadMessage.Files.Count) * 100.0f;
+
+                Log("[{2:000}%] Uploading file {0} ({1} bytes)", message.FileName, 
+                                                                 message.File.Length,
+                                                                 installationProgress);
+                client.SendMessage(message);
+            }
 
             client.SendMessage(new SDKInstallationFinishedMessage());
             Log("SDK installation finished!");
+
+            client.Disconnect();
 
             return true;
         }

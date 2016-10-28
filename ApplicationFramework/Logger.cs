@@ -6,10 +6,24 @@ using System.Text;
 
 namespace ApplicationFramework
 {
+    public enum Verbosity
+    {
+        Debug = 0,
+        Release,
+        Mute,
+        Default = Release
+    }
+
     public interface ILogger
     {
         void Log(String text);
         void Log(String format, params object[] objects);
+
+        void Log(Verbosity verbosity, String text);
+        void Log(Verbosity verbosity, String format, params object[] objects);
+
+        void Log(Exception exception);
+        void Log(Verbosity verbosity, Exception exception);
     }
 
     public class Logger : ILogger, IDisposable
@@ -18,25 +32,79 @@ namespace ApplicationFramework
         public const String LogFileExtension = "txt";
         public const int    MaxLogFiles      = 10;
 
+        public Verbosity Verbosity { get; set; }
+
         public Logger()
         {
             ClearLogFiles();
             OpenFileStream();
+#if DEBUG
+            Verbosity = Verbosity.Debug;
+#else
+            Verbosity = Verbosity.Default;
+#endif
         }
 
-        public virtual void Log(string text)
+        public void Log(string text)
+        {
+            Log(Verbosity.Default, text);
+        }
+
+        public void Log(String format, params object[] objects)
+        {
+            Log(Verbosity.Default, String.Format(format, objects));
+        }
+
+        public virtual void Log(Verbosity verbosity, string text)
         {
             WriteLineToFile(GetTimestampedText(text));
         }
 
-        public virtual void Log(String format, params object[] objects)
+        public void Log(Verbosity verbosity, string format, params object[] objects)
         {
-            Log(String.Format(format, objects));
+            Log(verbosity, String.Format(format, objects));
+        }
+
+        public void Log(Exception exception)
+        {
+            while (exception != null)
+            {
+                Log(Verbosity.Default, exception.Message);
+                Log(Verbosity.Debug,   exception.StackTrace);
+                exception = exception.InnerException;
+            }
+        }
+
+        public void Log(Verbosity verbosity, Exception exception)
+        {
+            while (exception != null)
+            {
+                Log(verbosity, exception.Message);
+                Log(verbosity, exception.StackTrace);
+                exception = exception.InnerException;
+            }
         }
 
         public void Dispose()
         {
             CloseFileStream();
+        }
+
+        public void Mute()
+        {
+            if (Verbosity != Verbosity.Mute)
+            {
+                _prevVerbosity = Verbosity;
+                Verbosity = Verbosity.Mute;
+            }
+        }
+
+        public void Unmute()
+        {
+            if (Verbosity == Verbosity.Mute)
+            {
+                Verbosity = _prevVerbosity;
+            }
         }
 
         protected String GetTimestampedText(String text)
@@ -107,5 +175,7 @@ namespace ApplicationFramework
         }
 
         protected FileStream _file = null;
+
+        private Verbosity _prevVerbosity = Verbosity.Default;
     }
 }

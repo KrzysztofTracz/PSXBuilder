@@ -15,6 +15,27 @@ namespace PSXBuildService
         public ILogger Logger  { get; protected set; }
         public String  SDKPath { get; protected set; }
 
+        public const String SDKPathToken     = "$SDKPath";
+        public const String SDKBinariesPath  = "$SDKPath\\bin";
+        public const String SDKLibrariesPath = "$SDKPath\\lib";
+        public const String SDKIncludesPath  = "$SDKPath\\include";
+
+        public const String SystemPathToken = "$System";
+        public const String SystemTempPath  = "$System\\TEMP";
+
+        public String[,] EnvironmentVariables = new[,]
+        {
+            { "PSX_PATH",            SDKBinariesPath },
+            { "PSYQ_PATH",           SDKBinariesPath },
+            { "COMPILER_PATH",       SDKBinariesPath },
+            { "LIBRARY_PATH",        SDKLibrariesPath },
+            { "C_PLUS_INCLUDE_PATH", SDKIncludesPath },
+            { "C_INCLUDE_PATH",      SDKIncludesPath },
+            { "GO32",                "DPMISTACK 1000000" },
+            { "G032TMP",             SystemTempPath },
+            { "TMPDIR",              SystemTempPath },
+        };
+
         public void Initialize(Server  server, 
                                ILogger logger,
                                String  sdkPath)
@@ -25,7 +46,7 @@ namespace PSXBuildService
 
             Server.RegisterDelegate<FileUploadMessage>(OnFileUploadMessage);
             Server.RegisterDelegate<SDKInstallationFinishedMessage>(OnSDKInstallationFinishedMessage);
-            Server.RegisterDelegate<CheckFileMessage>(OnCheckFileMessage);
+            Server.RegisterDelegate<CheckFilesMessage>(OnCheckFilesMessage);
 
             Server.SendMessage(new SDKInstallationStartedMessage());
             Logger.Log("Installation started.");
@@ -43,29 +64,88 @@ namespace PSXBuildService
             return true;
         }
 
-        protected bool OnCheckFileMessage(CheckFileMessage message)
+        protected bool OnCheckFilesMessage(CheckFilesMessage message)
         {
-            var file     = Utils.Path(SDKPath, message.Path);
-            var fileSize = message.FileSize;
+            Logger.Log("Checking installed files.");
 
-            Logger.Log("Checking {0}", file);
+            var filesToUpload = new FileListMessage();            
+            foreach (var key in message.Files.Keys)
+            {
+                var file     = Utils.Path(SDKPath, key);
+                var fileSize = message.Files[key];
 
-            bool result = System.IO.File.Exists(file) &&
-                          new System.IO.FileInfo(file).Length == fileSize;
+                bool result = System.IO.File.Exists(file) &&
+                              new System.IO.FileInfo(file).Length == fileSize;
 
-            Server.SendMessage(new CheckFileResultMessage(result));
+                if(!result)
+                {
+                    Logger.Log("File {0} is missing.", key);
+                    filesToUpload.Files.Add(key);
+                }
+            }
+
+            Server.SendMessage(filesToUpload);
 
             return true;
         }
 
         protected bool OnSDKInstallationFinishedMessage(SDKInstallationFinishedMessage message)
         {
+            AppendSystemPath();
+            SetSystemEnvironmentVariables();
+
             Logger.Log("Installation finished.");
             Server.UnregisterDelegate<FileUploadMessage>();
             Server.UnregisterDelegate<SDKInstallationFinishedMessage>();
             Server.UnregisterDelegate<CheckFileMessage>();
 
             return true;
+        }
+
+        protected void AppendSystemPath()
+        {
+            var sdkBinariesPath = ResolveVariable(SDKBinariesPath);
+            var path = Environment.GetEnvironmentVariable("PATH", 
+                                                          EnvironmentVariableTarget.Machine);
+
+            if (!path.Contains(sdkBinariesPath))
+            {
+                Logger.Log("Appending system PATH with {0}.", sdkBinariesPath);
+
+                path += sdkBinariesPath + ";";
+                Environment.SetEnvironmentVariable("PATH",
+                                                   path,
+                                                   EnvironmentVariableTarget.Machine);
+            }
+        }
+
+        protected void SetSystemEnvironmentVariables()
+        {
+            for(int i=0; i<EnvironmentVariables.GetLength(0); i++)
+            {
+                var name  = EnvironmentVariables[i, 0];
+                var value = ResolveVariable(EnvironmentVariables[i, 1]);
+                Logger.Log("Setting system variable {0} to {1}.", name, value);
+                Environment.SetEnvironmentVariable(name, 
+                                                   value,
+                                                   EnvironmentVariableTarget.Machine);
+            }
+        }
+
+        protected String ResolveVariable(String value)
+        {
+            if(value.Contains(SDKPathToken))
+            {
+                value = value.Replace(SDKPathToken, SDKPath);
+            }
+
+            if (value.Contains(SystemPathToken))
+            {
+                value = value.Replace(SystemPathToken, 
+                                      Environment.GetFolderPath(Environment.SpecialFolder.Windows));
+            }
+
+            return value;
         }
     }
 }

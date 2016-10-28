@@ -62,6 +62,7 @@ namespace Uploader
             message.ExeName = exeName;
 
             client.SendMessage(message);
+            client.WaitForMessage<TaskKilledMessage>();
         }
 
         static void SendFile(Client client, String path, String targetDirectory)
