@@ -51,6 +51,7 @@
     <Compile Include="Messages\CheckFilesMessage.cs" />
     <Compile Include="Messages\ClosingConnectionMessage.cs" />
     <Compile Include="Messages\ConnectionClosedMessage.cs" />
+    <Compile Include="Messages\EmptyMessage.cs" />
     <Compile Include="Messages\FileListMessage.cs" />
     <Compile Include="Messages\FileUploadMessage.cs" />
     <Compile Include="Messages\HeartbeatMessage.cs" />

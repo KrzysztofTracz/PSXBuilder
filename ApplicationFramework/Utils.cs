@@ -67,6 +67,16 @@ namespace ApplicationFramework
             return path.Split(DirectorySeparator).Last();
         }
 
+        public static String GetFileNameExcludingExtension(String path)
+        {
+            return GetFileName(path).Split('.').First();
+        }
+
+        public static String GetFileExtension(String path)
+        {
+            return GetFileName(path).Split('.').Last();
+        }
+
         public static String GetAcceptableFileName(String filename)
         {
             var result = filename;

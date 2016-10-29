@@ -6,7 +6,7 @@ using CommunicationFramework.Messages;
 
 namespace PSXBuilderNetworking.Messages
 {
-    public class SDKInstallationStartMessage : EmptyMessage
+    public class CompilationStartMessage : EmptyMessage
     {
 
     }

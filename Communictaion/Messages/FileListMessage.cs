@@ -14,6 +14,11 @@ namespace CommunicationFramework.Messages
             Files = new List<String>();
         }
 
+        public FileListMessage(List<String> files)
+        {
+            Files = files;
+        }
+
         protected override void AppendData(ByteArrayWriter arrayWriter)
         {
             foreach (var file in Files)

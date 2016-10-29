@@ -5,21 +5,8 @@ using System.Text;
 
 namespace CommunicationFramework.Messages
 {
-    public class PartialMessageReceived : Message
+    public class PartialMessageReceived : EmptyMessage
     {
-        protected override void AppendData(ByteArrayWriter arrayWriter)
-        {
-            
-        }
 
-        protected override int GetDataSize()
-        {
-            return 0;
-        }
-
-        protected override void ReadData(ByteArrayReader arrayReader)
-        {
-            
-        }
     }
 }
