@@ -144,7 +144,7 @@ namespace ApplicationFramework
         protected String GetLogDirectory()
         {
             return String.Format("{0}\\{1}",
-                                 Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+                                 Utils.GetExecutionPath(),
                                  LogDirectoryName);
         }
 

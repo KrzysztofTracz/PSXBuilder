@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Application.cs" />
     <Compile Include="Console.cs" />
+    <Compile Include="DOSNamesConverter.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Process.cs" />
     <Compile Include="Program.cs" />

@@ -8,6 +8,11 @@ namespace ApplicationFramework
 {
     public class Utils
     {
+        public static String GetExecutionPath()
+        {
+            return System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+        }
+
         public static String ConcatArguments(String separator, params String[] arguments)
         {
             String result = "";
@@ -74,7 +79,33 @@ namespace ApplicationFramework
 
         public static String GetFileExtension(String path)
         {
-            return GetFileName(path).Split('.').Last();
+            String result = "";
+            var split = GetFileName(path).Split('.');
+            if(split.Length > 1)
+            {
+                result = split.Last();
+            }
+            return result;
+        }
+
+        public static String FileName(String name, String extension)
+        {
+            String result = name;
+            if (!String.IsNullOrEmpty(extension))
+            {
+                result = String.Format("{0}.{1}", name, extension);
+            }
+            return result;
+        }
+
+        public static int GetMaximumValue(int digits)
+        {
+            int result = 0;
+            for(int i=0;i<digits;i++)
+            {
+                result += 9 * (int)Math.Pow(10, i);
+            }
+            return result;
         }
 
         public static String GetAcceptableFileName(String filename)
@@ -107,6 +138,16 @@ namespace ApplicationFramework
         public static String Path(params String[] elements)
         {
             return ConcatArguments(DirectorySeparator.ToString(), elements);
+        }
+
+        public static String CorrectDirectoryPath(String path)
+        {
+            var result = path;
+            if(path.EndsWith(DirectorySeparator.ToString()))
+            {
+                result = path.Substring(0, path.Length - 1);
+            }
+            return result;
         }
 
         public const char DirectorySeparator = '\\';

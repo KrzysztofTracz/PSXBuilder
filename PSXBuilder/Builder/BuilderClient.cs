@@ -13,7 +13,8 @@ namespace PSXBuilder
         public PSXProject Project   { get; protected set; }
         public BuildInfo  BuildInfo { get; protected set; }
 
-        public Client Client { get; protected set; }
+        public Client  Client { get; protected set; }
+        public ILogger Logger { get; protected set; }
 
         public BuilderClient()
         {
@@ -31,6 +32,8 @@ namespace PSXBuilder
 
             Client = new Client();
             Client.Inititalize(buildMachineAddress, logger);
+
+            Logger = logger;
         }
 
         public bool Build()
@@ -41,8 +44,14 @@ namespace PSXBuilder
             List<String>          filesToRemove;
 
             Client.Connect();
-            Client.SendMessage(new BuildSessionStartMessage(Environment.MachineName, Project.Name));
+
+            var user    = Environment.MachineName;
+            var project = Project.Name;
+
+            Logger.Log("Starting build session. User: {0}, Project: {1}.", user, project);
+            Client.SendMessage(new BuildSessionStartMessage(user, project));
             Client.WaitForMessage<BuildSessionStartedMessage>();
+            Logger.Log("Build session started.");
 
             PrepareFiles(out filesToUpload, out filesToRemove);
             SaveBuildInfo();
@@ -56,9 +65,11 @@ namespace PSXBuilder
                 fileUploadMessage.FileName = file.LocalPath;
                 fileUploadMessage.File     = System.IO.File.ReadAllBytes(file.Path);
 
+                Logger.Log("Uploading file {0}.", fileUploadMessage.FileName);
                 Client.SendMessage(fileUploadMessage);
             }
 
+            Logger.Log("Starting compilation.");
             Client.SendMessage(new CompilationStartMessage());
             var compilationResult = Client.WaitForMessage<CompilationResultMessage>();
 

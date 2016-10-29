@@ -26,13 +26,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeOutput>$(Configuration)\bin\PSXTestProject.exe</NMakeOutput>
+    <NMakeOutput>$(Configuration)\bin\$(ProjectName).exe</NMakeOutput>
     <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(PSX_INCLUDES)</NMakeIncludeSearchPath>
     <NMakeBuildCommandLine>%PSX_BUILDER% -b "$(MSBuildProjectFullPath)" $(Configuration) $(CrtSDKReferenceVersion)</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>%PSX_BUILDER% -r "$(MSBuildProjectFullPath)"</NMakeReBuildCommandLine>
-    <NMakeCleanCommandLine>%PSX_BUILDER% -c "$(MSBuildProjectFullPath)"</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>%PSX_BUILDER% -r "$(MSBuildProjectFullPath)" $(Configuration) $(CrtSDKReferenceVersion)</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>%PSX_BUILDER% -c "$(MSBuildProjectFullPath)" $(Configuration) $(CrtSDKReferenceVersion)</NMakeCleanCommandLine>
     <OutDir>$(SolutionDir)$(Configuration)\bin\</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>

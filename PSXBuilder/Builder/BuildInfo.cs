@@ -25,11 +25,10 @@ namespace PSXBuilder
             Files = new List<String>();
 
             var path = Utils.Path(directory, FileName);
-
-            XmlReader xmlReader = null;
+ 
             try
             {
-                xmlReader = XmlReader.Create(path);
+                XmlReader xmlReader = XmlReader.Create(path);
                 if (xmlReader != null)
                 {
                     while (xmlReader.Read())

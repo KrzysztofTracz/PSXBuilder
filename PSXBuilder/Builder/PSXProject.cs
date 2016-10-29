@@ -210,12 +210,12 @@ namespace PSXBuilder
 
                 Name     = Utils.GetFileNameExcludingExtension(fileName);
                 FileName = fileName;
+                
+                OutputFile      = project.GetPropertyValue("TargetPath");
+                OutputFileName  = project.GetPropertyValue("TargetFileName");
 
-                OutputDir      = project.GetPropertyValue("TargetDir");
-                OutputFile     = project.GetPropertyValue("TargetPath");
-                OutputFileName = project.GetPropertyValue("TargetFileName");
-
-                IntermediateDir = project.GetPropertyValue("IntDir");
+                OutputDir       = Utils.CorrectDirectoryPath(project.GetPropertyValue("TargetDir"));
+                IntermediateDir = Utils.CorrectDirectoryPath(project.GetPropertyValue("IntDir"));
 
                 Files = LoadFiles(project);
             }
