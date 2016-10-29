@@ -60,7 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Builder\Builder.cs" />
+    <Compile Include="Builder\BuilderClient.cs" />
     <Compile Include="Builder\BuildInfo.cs" />
     <Compile Include="Programs\BuildProgram.cs" />
     <Compile Include="Programs\ConnectionTestProgram.cs" />
@@ -69,6 +69,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PSXBuilder.cs" />
     <Compile Include="Builder\PSXProject.cs" />
+    <Compile Include="Server.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

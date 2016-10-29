@@ -21,6 +21,7 @@ namespace PSXBuildService.Programs
                                Application.Console);
 
             Server.RegisterDelegate<SDKInstallationStartMessage>(OnSDKInstallationStartMessage);
+            Server.RegisterDelegate<BuildSessionStartMessage>(OnBuildSessionStartMessage);
             Server.RegisterDelegate<GetSDKPathMessage>(OnGetSDKPathMessage);
             Server.RegisterDelegate<RunProcessMessage>(OnRunProcessMessage);
 
@@ -59,6 +60,17 @@ namespace PSXBuildService.Programs
                                       Application.Console,
                                       Application.SDKPath);
 
+            return true;
+        }
+
+        protected bool OnBuildSessionStartMessage(BuildSessionStartMessage message)
+        {
+            var builder = new Builder();
+            builder.Initialize(message.User,
+                               message.Project,
+                               Application.ProjectsPath,
+                               Server,
+                               Application.Console);
             return true;
         }
 

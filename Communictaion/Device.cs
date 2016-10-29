@@ -26,6 +26,9 @@ namespace CommunicationFramework
         }
 
         public delegate bool OnMessageDelegate<T>(T message) where T : Message;
+        public delegate void OnConnectionClosedDelegate();
+
+        public event OnConnectionClosedDelegate OnConnectionClosedEvent;
 
         public Device()
         {
@@ -332,6 +335,7 @@ namespace CommunicationFramework
             if (IsConnected || _stream != null || _tcpClient != null)
             {
                 Logger.Log("Closing connection.");
+                OnConnectionClosed();
             }
 
             if(IsConnected)
@@ -387,6 +391,14 @@ namespace CommunicationFramework
         public virtual void Dispose()
         {
             CloseConnection();
+        }
+
+        protected void OnConnectionClosed()
+        {
+            if(OnConnectionClosedEvent != null)
+            {
+                OnConnectionClosedEvent();
+            }
         }
 
         private TcpClient     _tcpClient = null;

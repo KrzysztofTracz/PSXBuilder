@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ApplicationFramework;
+using CommunicationFramework;
 using CommunicationFramework.Messages;
 using PSXBuilderNetworking;
 using PSXBuilderNetworking.Messages;
+using Server = PSXBuilderNetworking.Server;
 
 namespace PSXBuildService
 {
-    class SDKInstallator
+    class SDKInstallator : ServerModule<Server>
     {
-        public Server  Server  { get; protected set; }
-        public ILogger Logger  { get; protected set; }
-        public String  SDKPath { get; protected set; }
+        public String SDKPath { get; protected set; }
 
         public const String SDKPathToken     = "$SDKPath";
         public const String SDKBinariesPath  = "$SDKPath\\bin";
@@ -36,20 +36,29 @@ namespace PSXBuildService
             { "TMPDIR",              SystemTempPath },
         };
 
-        public void Initialize(Server  server, 
+        public void Initialize(Server server, 
                                ILogger logger,
                                String  sdkPath)
         {
-            Server  = server;
-            Logger  = logger;
+            base.Initialize(server, logger);
             SDKPath = sdkPath;
-
-            Server.RegisterDelegate<FileUploadMessage>(OnFileUploadMessage);
-            Server.RegisterDelegate<SDKInstallationFinishedMessage>(OnSDKInstallationFinishedMessage);
-            Server.RegisterDelegate<CheckFilesMessage>(OnCheckFilesMessage);
 
             Server.SendMessage(new SDKInstallationStartedMessage());
             Logger.Log("Installation started.");
+        }
+
+        protected override void UnsafeRegisterDelegates()
+        {   
+            Server.RegisterDelegate<FileUploadMessage>(OnFileUploadMessage);
+            Server.RegisterDelegate<SDKInstallationFinishedMessage>(OnSDKInstallationFinishedMessage);
+            Server.RegisterDelegate<CheckFilesMessage>(OnCheckFilesMessage);
+        }
+
+        protected override void UnsafeUnregisterDelegates()
+        {
+            Server.UnregisterDelegate<FileUploadMessage>();
+            Server.UnregisterDelegate<SDKInstallationFinishedMessage>();
+            Server.UnregisterDelegate<CheckFileMessage>();
         }
 
         protected bool OnFileUploadMessage(FileUploadMessage message)
@@ -93,11 +102,8 @@ namespace PSXBuildService
         {
             AppendSystemPath();
             SetSystemEnvironmentVariables();
-
+            UnregisterDelegates();
             Logger.Log("Installation finished.");
-            Server.UnregisterDelegate<FileUploadMessage>();
-            Server.UnregisterDelegate<SDKInstallationFinishedMessage>();
-            Server.UnregisterDelegate<CheckFileMessage>();
 
             return true;
         }

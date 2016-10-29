@@ -8,14 +8,14 @@ using PSXBuilderNetworking.Messages;
 
 namespace PSXBuilder
 {
-    class Builder
+    class BuilderClient
     {
         public PSXProject Project   { get; protected set; }
         public BuildInfo  BuildInfo { get; protected set; }
 
         public Client Client { get; protected set; }
 
-        public Builder()
+        public BuilderClient()
         {
             Project   = null;
             BuildInfo = null;
@@ -40,11 +40,13 @@ namespace PSXBuilder
             List<PSXProject.File> filesToUpload;
             List<String>          filesToRemove;
 
+            Client.Connect();
+            Client.SendMessage(new BuildSessionStartMessage(Environment.MachineName, Project.Name));
+            Client.WaitForMessage<BuildSessionStartedMessage>();
+
             PrepareFiles(out filesToUpload, out filesToRemove);
             SaveBuildInfo();
 
-            Client.Connect();
-            Client.SendMessage(new BuildSessionStartMessage(Environment.MachineName, Project.Name));
             Client.SendMessage(new RemoveFilesMessage(filesToRemove));
 
             foreach(var file in filesToUpload)

@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="Messages\BuildSessionStartedMessage.cs" />
     <Compile Include="Messages\BuildSessionStartMessage.cs" />
     <Compile Include="Messages\CompilationResultMessage.cs" />
     <Compile Include="Messages\CompilationStartMessage.cs" />
