@@ -24,7 +24,7 @@ namespace PSXBuilder
         {
             Files = new List<String>();
 
-            var path = Utils.Path(FileName);
+            var path = Utils.Path(directory, FileName);
 
             XmlReader xmlReader = null;
             try
@@ -62,7 +62,7 @@ namespace PSXBuilder
 
         public void Save(String directory)
         {
-            var path = Utils.Path(FileName);
+            var path = Utils.Path(directory, FileName);
 #if !DEBUG
             try
             {
@@ -77,7 +77,7 @@ namespace PSXBuilder
             {
                 xmlWriter.WriteStartDocument();
                 xmlWriter.WriteStartElement(XMLRootElement);
-                xmlWriter.WriteAttributeString(XMLTimeAttribute, Time.ToLongDateString());
+                xmlWriter.WriteAttributeString(XMLTimeAttribute, Time.ToString());
                 foreach(var file in Files)
                 {
                     xmlWriter.WriteElementString(XMLFileElement, file);
