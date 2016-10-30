@@ -27,7 +27,7 @@ namespace ApplicationFramework
             Arguments = arguments;
         }
 
-        public int Run(ILogger logger = null, bool waitForExit = true)
+        public int Run(ILogger logger = null, bool waitForExit = true, String workingDirectory = null)
         {
             int result = 0;
 
@@ -36,7 +36,12 @@ namespace ApplicationFramework
             process.StartInfo.FileName               = FileName;
             process.StartInfo.Arguments              = Utils.ConcatArguments(" ", Arguments);
 
-            if(waitForExit)
+            if(!String.IsNullOrEmpty(workingDirectory))
+            {
+                process.StartInfo.WorkingDirectory = workingDirectory;
+            }            
+
+            if (waitForExit)
             {
                 process.StartInfo.WindowStyle            = ProcessWindowStyle.Hidden;
                 process.StartInfo.UseShellExecute        = false;

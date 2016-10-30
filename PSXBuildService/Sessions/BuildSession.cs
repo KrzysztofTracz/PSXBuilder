@@ -16,6 +16,11 @@ namespace PSXBuildService
         public const String IntermediateFileExtension = "obj";
         public const String IntermediateDirectoryName = IntermediateFileExtension;
         public const String OutputDirectoryName       = "bin";
+        public const String ControlFileExtension      = "cf";
+        public const String BinaryFileExtension       = "cpe";
+        public const String SymbolFileExtension       = "sym";
+        public const String MapFileExtension          = "map";
+
 
         public String IntermediateDirectory { get; protected set; }
         public String OutputDirectory       { get; protected set; }
@@ -78,6 +83,7 @@ namespace PSXBuildService
             Server.RegisterDelegate<RemoveFilesMessage>(OnRemoveFilesMessage);
             Server.RegisterDelegate<ProjectFileUploadMessage>(OnProjectFileUploadMessage);
             Server.RegisterDelegate<CompilationStartMessage>(OnCompilationStartMessage);
+            Server.RegisterDelegate<LinkingProcessStartMessage>(OnLinkingProcessStartMessage);
         }
 
         protected override void UnsafeUnregisterDelegates()
@@ -85,6 +91,7 @@ namespace PSXBuildService
             Server.UnregisterDelegate<RemoveFilesMessage>();
             Server.UnregisterDelegate<ProjectFileUploadMessage>();
             Server.UnregisterDelegate<CompilationStartMessage>();
+            Server.UnregisterDelegate<LinkingProcessStartMessage>();
         }
 
         protected bool OnRemoveFilesMessage(RemoveFilesMessage message)
@@ -145,7 +152,7 @@ namespace PSXBuildService
             var outputBuffer = new StringBuilder();
             foreach (var file in FilesToCompile)
             {
-                Server.SendLog("Compiling file {0}", Utils.GetFileName(file));
+                Server.SendLog("Compiling file: {0}", Utils.GetFileName(file));
                 var process = new Process("ccpsx.exe", "-c", file, "-o", GetObjFile(file));
                 returnCode = process.Run(Logger);                
                 if (returnCode != 0)
@@ -155,12 +162,67 @@ namespace PSXBuildService
                 }
             }
 
-            var compilationResultMessage = new CompilationResultMessage();
-            compilationResultMessage.ReturnCode = returnCode;
-            compilationResultMessage.Output     = outputBuffer.ToString();
+            var resultMessage = new CompilationResultMessage();
+            resultMessage.ReturnCode = returnCode;
+            resultMessage.Output     = outputBuffer.ToString();
 
-            Server.SendMessage(compilationResultMessage);
+            Server.SendMessage(resultMessage);
             return true;
+        }
+
+        protected bool OnLinkingProcessStartMessage(LinkingProcessStartMessage message)
+        {
+            var returnCode = 0;
+            var outputBuffer = new StringBuilder();
+
+            var files = System.IO.Directory.GetFiles(NamesConverter.GetShortPath(IntermediateDirectory), 
+                                                     Utils.FileName("*", IntermediateFileExtension));
+
+            var controlFile = CreateControlFile(NamesConverter.GetShortName(Project), 
+                                                files);
+
+            for(int i=0;i<files.Length;i++)
+            {
+                files[i] = Utils.GetFileName(files[i]);
+            }
+
+            Server.SendLog("Linking files: {0}", Utils.ConcatArguments(", ", files));
+            var outputFileName = NamesConverter.GetShortPath(Utils.Path(OutputDirectory, Project));
+            var outputFiles = Utils.ConcatArguments(",", Utils.FileName(outputFileName, BinaryFileExtension),
+                                                         Utils.FileName(outputFileName, SymbolFileExtension),
+                                                         Utils.FileName(outputFileName, MapFileExtension));
+
+            var process = new Process("ccpsx.exe", "-Xo$80010000", controlFile, "-o", outputFiles);
+            returnCode = process.Run(Logger);
+            if (returnCode != 0)
+            {
+                outputBuffer.Append("LINKER : error : ");
+                outputBuffer.AppendLine(process.Output);
+            }
+
+            var resultMessage = new LinkingProcessResultMessage();
+            resultMessage.ReturnCode = returnCode;
+            resultMessage.Output     = outputBuffer.ToString();
+
+            Server.SendMessage(resultMessage);
+            return true;
+        }
+
+        protected String CreateControlFile(String name, params String[] files)
+        {
+            var buffer = new StringBuilder();
+            foreach(var file in files)
+            {
+                buffer.AppendLine(file);
+            }
+
+            var path = NamesConverter.GetShortPath(Utils.Path(IntermediateDirectory, 
+                                                              Utils.FileName(name, 
+                                                                             ControlFileExtension)));
+
+            System.IO.File.WriteAllText(path, 
+                                        buffer.ToString());
+            return "@" + path;
         }
     }
 }

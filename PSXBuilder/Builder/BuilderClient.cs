@@ -79,8 +79,20 @@ namespace PSXBuilder
             Client.SendMessage(new CompilationStartMessage());
             var compilationResult = Client.WaitForMessage<CompilationResultMessage>();
 
-            result = compilationResult.ReturnCode == 0;
+            bool startLinker = false;
+
+            startLinker = compilationResult.ReturnCode == 0;
             Logger.Log(compilationResult.Output);
+
+            if (startLinker)
+            {
+                Logger.Log("Starting linker.");
+                Client.SendMessage(new LinkingProcessStartMessage());
+                var linkerResult = Client.WaitForMessage<LinkingProcessResultMessage>();
+
+                result = linkerResult.ReturnCode == 0;
+                Logger.Log(linkerResult.Output);
+            }
 
             return result;
         }
