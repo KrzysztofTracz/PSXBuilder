@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ApplicationFramework;
+using CommunicationFramework.Messages;
 using PSXBuilderNetworking;
 using PSXBuilderNetworking.Messages;
 
@@ -53,6 +54,7 @@ namespace PSXBuilder
             var buildSessionStartMessage = new BuildSessionStartMessage();
             buildSessionStartMessage.User    = user;
             buildSessionStartMessage.Project = project;
+            buildSessionStartMessage.Output  = Utils.GetFileNameExcludingExtension(Project.OutputFileName);
 
             Client.SendMessage(buildSessionStartMessage);
             Client.WaitForMessage<BuildSessionStartedMessage>();
@@ -75,26 +77,61 @@ namespace PSXBuilder
                 Client.SendMessage(fileUploadMessage);
             }
 
-            Logger.Log("Starting compilation.");
-            Client.SendMessage(new CompilationStartMessage());
-            var compilationResult = Client.WaitForMessage<CompilationResultMessage>();
+            bool startLinker      = false;
+            bool createExecutable = false;
+            bool downloadBinaries = false;
 
-            bool startLinker = false;
-
-            startLinker = compilationResult.ReturnCode == 0;
-            Logger.Log(compilationResult.Output);
-
+            startLinker = StartRemoteProcess<CompilationStartMessage, 
+                                             CompilationResultMessage>
+                                            ("Starting compilation.");
             if (startLinker)
             {
-                Logger.Log("Starting linker.");
-                Client.SendMessage(new LinkingProcessStartMessage());
-                var linkerResult = Client.WaitForMessage<LinkingProcessResultMessage>();
+                createExecutable = StartRemoteProcess<LinkingProcessStartMessage, 
+                                                      LinkingProcessResultMessage>
+                                                     ("Starting linker.");
+            }
 
-                result = linkerResult.ReturnCode == 0;
-                Logger.Log(linkerResult.Output);
+            if(createExecutable)
+            {
+                downloadBinaries = StartRemoteProcess<CreateExecutableMessage, 
+                                                      CreatingExecutableResultMessage>
+                                                     ("Creating executable.");
+            }
+
+            if (downloadBinaries)
+            {
+                Logger.Log("Downloading binaries.");
+                Client.RegisterDelegate<FileUploadMessage>(OnFileUploadMessage);
+                Client.SendMessage(new DownloadProjectBinariesMessage());
+                Client.WaitForMessage<ProjectBinariesDownloadedMessage>();
+                Client.UnregisterDelegate<FileUploadMessage>();
+                Logger.Log("Binaries downloaded.");
+                result = true;
             }
 
             return result;
+        }
+
+        protected bool StartRemoteProcess<INVOKE, RESULT>(String log) where INVOKE : EmptyMessage, new()
+                                                                      where RESULT : ProcessResultMessage
+        {
+            Logger.Log(log);
+            Client.SendMessage(new INVOKE());
+            var resultMessage = Client.WaitForMessage<RESULT>();
+            Logger.Log(resultMessage.Output);
+            return resultMessage.ReturnCode == 0;
+        }
+
+        protected bool OnFileUploadMessage(FileUploadMessage message)
+        {
+            var fileName = Utils.Path(Project.OutputDir, message.FileName);    
+            Logger.Log("Writting file {0}", Utils.GetFileName(fileName));
+
+            var filestream = Utils.CreateFile(fileName);
+            filestream.Write(message.File, 0, message.File.Length);
+            filestream.Close();
+
+            return true;
         }
 
         protected void PrepareFiles(out List<PSXProject.File> filesToUpload, out List<String> filesToRemove)

@@ -26,7 +26,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeOutput>$(Configuration)\bin\$(ProjectName).exe</NMakeOutput>
+    <NMakeOutput>$(Configuration)\bin\TEST.exe</NMakeOutput>
     <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(PSX_INCLUDES)</NMakeIncludeSearchPath>
     <NMakeBuildCommandLine>%PSX_BUILDER% -b "$(MSBuildProjectFullPath)" $(Configuration) $(CrtSDKReferenceVersion)</NMakeBuildCommandLine>

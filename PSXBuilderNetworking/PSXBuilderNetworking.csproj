@@ -46,9 +46,13 @@
     <Compile Include="Messages\CleanSessionStartMessage.cs" />
     <Compile Include="Messages\CompilationResultMessage.cs" />
     <Compile Include="Messages\CompilationStartMessage.cs" />
+    <Compile Include="Messages\CreateExecutableMessage.cs" />
+    <Compile Include="Messages\CreatingExecutableResultMessage.cs" />
+    <Compile Include="Messages\DownloadProjectBinariesMessage.cs" />
     <Compile Include="Messages\GetSDKPathMessage.cs" />
     <Compile Include="Messages\LinkingProcessResultMessage.cs" />
     <Compile Include="Messages\LinkingProcessStartMessage.cs" />
+    <Compile Include="Messages\ProjectBinariesDownloadedMessage.cs" />
     <Compile Include="Messages\ProjectFileUploadMessage.cs" />
     <Compile Include="Messages\RemoveFilesMessage.cs" />
     <Compile Include="Messages\SDKInstallationFinishedMessage.cs" />

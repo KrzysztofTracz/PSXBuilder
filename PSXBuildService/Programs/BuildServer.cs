@@ -71,6 +71,7 @@ namespace PSXBuildService.Programs
             builder.Initialize(message.User,
                                message.Project,
                                Application.ProjectsPath,
+                               message.Output,
                                Server,
                                Application.Console);
             builder.Start();

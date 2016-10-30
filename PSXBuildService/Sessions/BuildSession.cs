@@ -20,10 +20,11 @@ namespace PSXBuildService
         public const String BinaryFileExtension       = "cpe";
         public const String SymbolFileExtension       = "sym";
         public const String MapFileExtension          = "map";
-
+        public const String ExecutableFileExtension   = "exe";
 
         public String IntermediateDirectory { get; protected set; }
         public String OutputDirectory       { get; protected set; }
+        public String OutputFileName        { get; protected set; }
 
         public List<String> FilesToCompile { get; protected set; }
 
@@ -31,15 +32,17 @@ namespace PSXBuildService
         {
             IntermediateDirectory = "";
             OutputDirectory       = "";
+            OutputFileName        = "";
 
             FilesToCompile = null;
         }
 
-        public override void Initialize(String user,
-                                        String project,
-                                        String rootDirectory,
-                                        Server server,
-                                        ILogger logger)
+        public void Initialize(String user,
+                               String project,
+                               String rootDirectory,
+                               String output,
+                               Server server,
+                               ILogger logger)
         {
             base.Initialize(user,
                             project,
@@ -48,7 +51,8 @@ namespace PSXBuildService
                             logger);
 
             IntermediateDirectory = Utils.Path(RootDirectory, IntermediateDirectoryName);
-            OutputDirectory       = Utils.Path(RootDirectory, OutputDirectoryName);        
+            OutputDirectory       = Utils.Path(RootDirectory, OutputDirectoryName);
+            OutputFileName        = Utils.Path(OutputDirectory, output);
 
             PrepareDirectories();
 
@@ -84,6 +88,8 @@ namespace PSXBuildService
             Server.RegisterDelegate<ProjectFileUploadMessage>(OnProjectFileUploadMessage);
             Server.RegisterDelegate<CompilationStartMessage>(OnCompilationStartMessage);
             Server.RegisterDelegate<LinkingProcessStartMessage>(OnLinkingProcessStartMessage);
+            Server.RegisterDelegate<CreateExecutableMessage>(OnCreateExecutableMessage);
+            Server.RegisterDelegate<DownloadProjectBinariesMessage>(OnDownloadProjectBinariesMessage);
         }
 
         protected override void UnsafeUnregisterDelegates()
@@ -92,6 +98,8 @@ namespace PSXBuildService
             Server.UnregisterDelegate<ProjectFileUploadMessage>();
             Server.UnregisterDelegate<CompilationStartMessage>();
             Server.UnregisterDelegate<LinkingProcessStartMessage>();
+            Server.UnregisterDelegate<CreateExecutableMessage>();
+            Server.UnregisterDelegate<DownloadProjectBinariesMessage>();
         }
 
         protected bool OnRemoveFilesMessage(RemoveFilesMessage message)
@@ -187,7 +195,7 @@ namespace PSXBuildService
             }
 
             Server.SendLog("Linking files: {0}", Utils.ConcatArguments(", ", files));
-            var outputFileName = NamesConverter.GetShortPath(Utils.Path(OutputDirectory, Project));
+            var outputFileName = NamesConverter.GetShortPath(OutputFileName);
             var outputFiles = Utils.ConcatArguments(",", Utils.FileName(outputFileName, BinaryFileExtension),
                                                          Utils.FileName(outputFileName, SymbolFileExtension),
                                                          Utils.FileName(outputFileName, MapFileExtension));
@@ -223,6 +231,42 @@ namespace PSXBuildService
             System.IO.File.WriteAllText(path, 
                                         buffer.ToString());
             return "@" + path;
+        }
+
+        protected bool OnCreateExecutableMessage(CreateExecutableMessage message)
+        {
+            var outputBuffer = new StringBuilder();
+            var process = new Process("cpe2x.exe", "/CE", NamesConverter.GetShortName(Utils.FileName(Utils.GetFileName(OutputFileName), 
+                                                                                                     BinaryFileExtension)));
+            var returnCode = process.Run(Logger, true, NamesConverter.GetShortPath(OutputDirectory));
+            if (returnCode != 0)
+            {
+                outputBuffer.Append("CPE2X : error : ");
+            }
+            outputBuffer.AppendLine(process.Output);
+
+            var resultMessage = new CreatingExecutableResultMessage();
+            resultMessage.ReturnCode = returnCode;
+            resultMessage.Output = outputBuffer.ToString();
+
+            Server.SendMessage(resultMessage);
+            return true;
+        }
+
+        protected bool OnDownloadProjectBinariesMessage(DownloadProjectBinariesMessage message)
+        {
+            var files = System.IO.Directory.GetFiles(NamesConverter.GetShortPath(OutputDirectory));
+
+            foreach(var file in files)
+            {
+                var fileUploadMessage = new FileUploadMessage();
+                fileUploadMessage.FileName = Utils.ConvertPathToLocal(NamesConverter.GetLongPath(file), OutputDirectory);
+                fileUploadMessage.File     = System.IO.File.ReadAllBytes(file);
+                Server.SendMessage(fileUploadMessage);
+            }
+
+            Server.SendMessage(new ProjectBinariesDownloadedMessage());
+            return true;
         }
     }
 }

@@ -17,6 +17,10 @@ namespace PSXBuilder
             if (project.Load(arguments[0], arguments[1], arguments[2]))
             {
                 BuildInfo.Clear(project.IntermediateDir);
+                if (System.IO.Directory.Exists(project.OutputDir))
+                {
+                    System.IO.Directory.Delete(project.OutputDir, true);
+                }
 
                 var client = new Client();
                 client.Inititalize(Application.NetworkingSystem.GetConnectionAddress(),
