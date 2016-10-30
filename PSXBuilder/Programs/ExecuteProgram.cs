@@ -10,7 +10,11 @@ namespace PSXBuilder.Programs
     {
         public override bool Start(params String[] arguments)
         {
-            var process = new Process(Application.EPSXEPath, "-nogui", "\"" + arguments[0] + "\"");
+            var process = new Process(Utils.Quotes(Application.EPSXEPath), 
+                                      "-nogui", 
+                                      "-bios", 
+                                      Utils.Quotes(Application.EPSXEBios), Utils.Quotes(arguments[0]));
+
             process.Run(Application.Console, false);
 
             return true;

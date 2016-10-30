@@ -18,6 +18,9 @@ namespace PSXBuilder
         [SettingsField("..\\ePSXe\\ePSXe.exe")]
         public String EPSXEPath = null;
 
+        [SettingsField("..\\ePSXe\\bios\\SCPH1001.BIN")]
+        public String EPSXEBios = null;
+
         public NetworkingSystem NetworkingSystem = new NetworkingSystem();
 
         public override String GetName()

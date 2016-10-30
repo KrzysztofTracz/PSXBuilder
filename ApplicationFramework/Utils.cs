@@ -150,6 +150,11 @@ namespace ApplicationFramework
             return result;
         }
 
+        public static String Quotes(String text)
+        {
+            return String.Format("\"{0}\"", text);
+        }
+
         public const char DirectorySeparator = '\\';
 
         public static readonly char[] UnacceptableFileNameCharacters = { '/', '\\', ':', '|', '*', '?', '"', '<', '>' };
