@@ -16,10 +16,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSXBuildService", "PSXBuild
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PSXTestProject", "PSXTestProject\PSXTestProject.vcxproj", "{7C821FA1-A6C4-46CD-B9F5-F654110C1F6F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4282529A-F2FD-4FB5-A90F-63B30A2F05DF} = {4282529A-F2FD-4FB5-A90F-63B30A2F05DF}
-		{061395D3-B887-4B7A-9B51-61EC5FD865BB} = {061395D3-B887-4B7A-9B51-61EC5FD865BB}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationFramework", "ApplicationFramework\ApplicationFramework.csproj", "{C8ADCD1B-D1AC-4ECB-B99A-E07E98EC31D7}"
 EndProject

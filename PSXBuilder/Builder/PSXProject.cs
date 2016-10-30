@@ -218,7 +218,8 @@ namespace PSXBuilder
                 IntermediateDir = Utils.CorrectDirectoryPath(project.GetPropertyValue("IntDir"));
 
                 Files = LoadFiles(project);
-            }
+                ProjectCollection.GlobalProjectCollection.UnloadProject(project);
+            }           
 
             return result;
         }

@@ -42,6 +42,8 @@
     <Compile Include="Client.cs" />
     <Compile Include="Messages\BuildSessionStartedMessage.cs" />
     <Compile Include="Messages\BuildSessionStartMessage.cs" />
+    <Compile Include="Messages\CleanSessionFinishedMessage.cs" />
+    <Compile Include="Messages\CleanSessionStartMessage.cs" />
     <Compile Include="Messages\CompilationResultMessage.cs" />
     <Compile Include="Messages\CompilationStartMessage.cs" />
     <Compile Include="Messages\GetSDKPathMessage.cs" />
@@ -51,6 +53,7 @@
     <Compile Include="Messages\SDKInstallationStartedMessage.cs" />
     <Compile Include="Messages\SDKInstallationStartMessage.cs" />
     <Compile Include="Messages\SDKPathMessage.cs" />
+    <Compile Include="Messages\SessionStartMessage.cs" />
     <Compile Include="NetworkingSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />

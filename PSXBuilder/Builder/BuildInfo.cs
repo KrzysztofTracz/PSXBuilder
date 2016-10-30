@@ -20,6 +20,13 @@ namespace PSXBuilder
         public List<String> Files { get; set; }
         public DateTime     Time  { get; set; }
 
+        public ILogger Logger { get; protected set; }
+
+        public void Initialize(ILogger logger)
+        {
+            Logger = logger;
+        }
+
         public void Load(String directory)
         {
             Files = new List<String>();
@@ -54,7 +61,7 @@ namespace PSXBuilder
 #if !DEBUG
             catch(Exception e)
             {
-                logger.Log(e.Message);
+                Logger.Log(e.Message);
             } 
 #endif
         }
@@ -90,9 +97,18 @@ namespace PSXBuilder
             }
             catch (Exception e)
             {
-                logger.Log(e.Message);
+                Logger.Log(e.Message);
             }   
 #endif
+        }
+
+        public static void Clear(String directory)
+        {
+            var path = Utils.Path(directory, FileName);
+            if(System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
         }
     }
 }

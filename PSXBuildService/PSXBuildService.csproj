@@ -41,12 +41,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Builder.cs" />
+    <Compile Include="BuildSession.cs" />
+    <Compile Include="CleanSession.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Programs\BuildServer.cs" />
     <Compile Include="PSXBuildService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SDKInstallator.cs" />
+    <Compile Include="Session.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ApplicationFramework\ApplicationFramework.csproj">

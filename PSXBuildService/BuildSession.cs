@@ -10,58 +10,47 @@ using Server = PSXBuilderNetworking.Server;
 
 namespace PSXBuildService
 {
-    public class Builder : ServerModule<Server>
+    public class BuildSession : Session
     {
         public const String IntermediateFileExtension = "obj";
         public const String IntermediateDirectoryName = IntermediateFileExtension;
         public const String OutputDirectoryName       = "bin";
 
-        public String User    { get; protected set; }
-        public String Project { get; protected set; }
-
-        public String RootDirectory         { get; protected set; }
         public String IntermediateDirectory { get; protected set; }
         public String OutputDirectory       { get; protected set; }
 
-        public DOSNamesConverter NamesConverter { get; protected set; }
-
         public List<String> FilesToCompile { get; protected set; }
 
-        public Builder()
+        public BuildSession()
         {
-            User    = "";
-            Project = "";
-
-            RootDirectory         = "";
             IntermediateDirectory = "";
             OutputDirectory       = "";
 
-            NamesConverter = null;
             FilesToCompile = null;
         }
 
-        public void Initialize(String user,
-                               String project,
-                               String rootDirectory,
-                               Server server,
-                               ILogger logger)
+        public override void Initialize(String user,
+                                        String project,
+                                        String rootDirectory,
+                                        Server server,
+                                        ILogger logger)
         {
-            base.Initialize(server, logger);
+            base.Initialize(user,
+                            project,
+                            rootDirectory,
+                            server,
+                            logger);
 
-            User    = user;
-            Project = project;
-
-            RootDirectory         = Utils.Path(rootDirectory, User, Project);
             IntermediateDirectory = Utils.Path(RootDirectory, IntermediateDirectoryName);
             OutputDirectory       = Utils.Path(RootDirectory, OutputDirectoryName);        
-
-            NamesConverter = new DOSNamesConverter();
-            NamesConverter.Load();
 
             PrepareDirectories();
 
             FilesToCompile = new List<String>();
+        }
 
+        public override void Start()
+        {
             Server.SendMessage(new BuildSessionStartedMessage());
             Logger.Log("Build session started. User {0}, Project {1}", User, Project);
         }
@@ -147,11 +136,6 @@ namespace PSXBuildService
         protected bool OnCompilationStartMessage(CompilationStartMessage message)
         {
             return true;
-        }
-
-        protected String GetFullPath(String localPath)
-        {
-            return Utils.Path(RootDirectory, localPath);
         }
     }
 }

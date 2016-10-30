@@ -22,6 +22,8 @@ namespace PSXBuildService.Programs
 
             Server.RegisterDelegate<SDKInstallationStartMessage>(OnSDKInstallationStartMessage);
             Server.RegisterDelegate<BuildSessionStartMessage>(OnBuildSessionStartMessage);
+            Server.RegisterDelegate<CleanSessionStartMessage>(OnCleanSessionStartMessage);
+
             Server.RegisterDelegate<GetSDKPathMessage>(OnGetSDKPathMessage);
             Server.RegisterDelegate<RunProcessMessage>(OnRunProcessMessage);
 
@@ -59,18 +61,31 @@ namespace PSXBuildService.Programs
             sdkInstallator.Initialize(Server,
                                       Application.Console,
                                       Application.SDKPath);
-
+            sdkInstallator.Start();
             return true;
         }
 
         protected bool OnBuildSessionStartMessage(BuildSessionStartMessage message)
         {
-            var builder = new Builder();
+            var builder = new BuildSession();
             builder.Initialize(message.User,
                                message.Project,
                                Application.ProjectsPath,
                                Server,
                                Application.Console);
+            builder.Start();
+            return true;
+        }
+
+        protected bool OnCleanSessionStartMessage(CleanSessionStartMessage message)
+        {
+            var cleaner = new CleanSession();
+            cleaner.Initialize(message.User,
+                               message.Project,
+                               Application.ProjectsPath,
+                               Server,
+                               Application.Console);
+            cleaner.Start();
             return true;
         }
 

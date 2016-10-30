@@ -6,17 +6,18 @@ using ApplicationFramework;
 
 namespace CommunicationFramework
 {
-    public abstract class ServerModule<T> where T : Server
+    public abstract class ServerSession<T> where T : Server
     {
         public T       Server { get; protected set; }
         public ILogger Logger { get; protected set; }
 
-        public ServerModule()
+        public ServerSession()
         {
             Server = null;
             Logger = null;
         }
 
+        public    abstract void Start(); 
         protected abstract void UnsafeRegisterDelegates();
         protected abstract void UnsafeUnregisterDelegates();
 

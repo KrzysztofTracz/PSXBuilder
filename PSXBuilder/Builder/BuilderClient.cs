@@ -28,6 +28,7 @@ namespace PSXBuilder
             Project = project;
 
             BuildInfo = new BuildInfo();
+            BuildInfo.Initialize(logger);
             BuildInfo.Load(project.IntermediateDir);
 
             Client = new Client();
@@ -49,7 +50,11 @@ namespace PSXBuilder
             var project = Project.Name;
 
             Logger.Log("Starting build session. User: {0}, Project: {1}.", user, project);
-            Client.SendMessage(new BuildSessionStartMessage(user, project));
+            var buildSessionStartMessage = new BuildSessionStartMessage();
+            buildSessionStartMessage.User    = user;
+            buildSessionStartMessage.Project = project;
+
+            Client.SendMessage(buildSessionStartMessage);
             Client.WaitForMessage<BuildSessionStartedMessage>();
             Logger.Log("Build session started.");
 
@@ -65,7 +70,8 @@ namespace PSXBuilder
                 fileUploadMessage.FileName = file.LocalPath;
                 fileUploadMessage.File     = System.IO.File.ReadAllBytes(file.Path);
 
-                Logger.Log("Uploading file {0}.", fileUploadMessage.FileName);
+                Logger.Log("Uploading file {0} [{1} bytes].", fileUploadMessage.FileName,
+                                                              fileUploadMessage.File.Length);
                 Client.SendMessage(fileUploadMessage);
             }
 

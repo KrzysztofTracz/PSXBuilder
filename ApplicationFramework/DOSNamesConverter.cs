@@ -17,6 +17,13 @@ namespace ApplicationFramework
 
         public const int MaxNameLength = 8;        
 
+        public ILogger Logger { get; protected set; }
+
+        public void Initialize(ILogger logger)
+        {
+            Logger = logger;
+        }
+
         public String GetShortName(String fileName)
         {
             var extension = Utils.GetFileExtension(fileName);
@@ -169,7 +176,7 @@ namespace ApplicationFramework
 #if !DEBUG
             catch(Exception e)
             {
-                logger.Log(e.Message);
+                Logger.Log(e.Message);
             } 
 #endif
         }
@@ -206,7 +213,7 @@ namespace ApplicationFramework
             }
             catch (Exception e)
             {
-                logger.Log(e.Message);
+                Logger.Log(e.Message);
             }   
 #endif
         }

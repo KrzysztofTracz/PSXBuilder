@@ -11,7 +11,7 @@ using Server = PSXBuilderNetworking.Server;
 
 namespace PSXBuildService
 {
-    class SDKInstallator : ServerModule<Server>
+    class SDKInstallator : ServerSession<Server>
     {
         public String SDKPath { get; protected set; }
 
@@ -42,7 +42,10 @@ namespace PSXBuildService
         {
             base.Initialize(server, logger);
             SDKPath = sdkPath;
+        }
 
+        public override void Start()
+        {
             Server.SendMessage(new SDKInstallationStartedMessage());
             Logger.Log("Installation started.");
         }
