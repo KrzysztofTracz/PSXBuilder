@@ -66,6 +66,7 @@
     <Compile Include="Programs\CleanProgram.cs" />
     <Compile Include="Programs\ConnectionTestProgram.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Programs\ExecuteProgram.cs" />
     <Compile Include="Programs\RebuildProgram.cs" />
     <Compile Include="Programs\SDKInstallationProgram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

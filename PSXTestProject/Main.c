@@ -41,7 +41,7 @@ int main()
 
 	while (1) // draw and display forever
 	{
-		FntPrint("             HELLO WORLD\n\n          HTTP://PSXDEV.NET/");
+		FntPrint("            HELLO WORLD\n\n         JESTEM DEVELOPEREM");
 		display();
 	}
 

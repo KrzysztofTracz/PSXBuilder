@@ -15,6 +15,9 @@ namespace PSXBuilder
         [SettingsField("..\\Psyq")]
         public String SDKPath = null;
 
+        [SettingsField("..\\ePSXe\\ePSXe.exe")]
+        public String EPSXEPath = null;
+
         public NetworkingSystem NetworkingSystem = new NetworkingSystem();
 
         public override String GetName()
