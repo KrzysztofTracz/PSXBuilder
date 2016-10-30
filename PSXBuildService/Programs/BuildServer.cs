@@ -57,7 +57,7 @@ namespace PSXBuildService.Programs
 
         protected bool OnSDKInstallationStartMessage(SDKInstallationStartMessage message)
         {
-            var sdkInstallator = new SDKInstallator();
+            var sdkInstallator = new SDKInstallationSession();
             sdkInstallator.Initialize(Server,
                                       Application.Console,
                                       Application.SDKPath);

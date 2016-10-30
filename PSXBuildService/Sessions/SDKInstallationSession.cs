@@ -11,7 +11,7 @@ using Server = PSXBuilderNetworking.Server;
 
 namespace PSXBuildService
 {
-    class SDKInstallator : ServerSession<Server>
+    class SDKInstallationSession : ServerSession<Server>
     {
         public String SDKPath { get; protected set; }
 
