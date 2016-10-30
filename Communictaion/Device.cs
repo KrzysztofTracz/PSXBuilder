@@ -40,9 +40,12 @@ namespace CommunicationFramework
         public virtual void Inititalize(String address, ILogger loggger)
         {
             InitAddress(address);
+
             RegisterDelegate<Messages.PartialMessageStart>(OnPartialMessageStart);
             RegisterDelegate<Messages.PingMessage>(OnPingMessage);
             RegisterDelegate<Messages.ClosingConnectionMessage>(OnClosingConnectionMessage);
+            RegisterDelegate<Messages.LogMessage>(OnLogMessage);            
+
             IsInitialized = true;
             Logger = loggger;
         }
@@ -364,6 +367,17 @@ namespace CommunicationFramework
             return true;
         }
 
+        public void SendLog(String format, params object[] objects)
+        {
+            SendMessage(new Messages.LogMessage(format, objects));
+        }
+
+        protected bool OnLogMessage(Messages.LogMessage message)
+        {
+            Logger.Log(message.Text);
+            return true;
+        }
+
         private void InitAddress(String address)
         {
             var split = address.Split(':');
@@ -382,7 +396,7 @@ namespace CommunicationFramework
 
         public void UnregisterDelegate<T>() where T : Message
         {
-            if (!messageDelegates.ContainsKey(typeof(T)))
+            if (messageDelegates.ContainsKey(typeof(T)))
             {
                 messageDelegates.Remove(typeof(T));
             }

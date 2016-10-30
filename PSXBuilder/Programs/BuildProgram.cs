@@ -18,9 +18,8 @@ namespace PSXBuilder
                 builder.Initialize(project, 
                                    Application.NetworkingSystem.GetConnectionAddress(), 
                                    Application.Console);
-                builder.Build();
 
-                result = true;
+                result = builder.Build();
             }
 
             return result;

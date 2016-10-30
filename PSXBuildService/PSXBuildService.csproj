@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuildMessageConverter.cs" />
     <Compile Include="Sessions\BuildSession.cs" />
     <Compile Include="Sessions\CleanSession.cs" />
     <Compile Include="Program.cs" />

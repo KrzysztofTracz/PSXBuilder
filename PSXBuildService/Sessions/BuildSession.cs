@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ApplicationFramework;
 using CommunicationFramework;
+using CommunicationFramework.Messages;
 using PSXBuilderNetworking;
 using PSXBuilderNetworking.Messages;
 using Server = PSXBuilderNetworking.Server;
@@ -102,10 +103,15 @@ namespace PSXBuildService
 
         protected void RemoveObjFile(String file)
         {
-            DeleteFile(Utils.Path(IntermediateDirectory,
-                                  Utils.FileName(Utils.GetFileNameExcludingExtension(file),
-                                                 IntermediateFileExtension)));
+            DeleteFile(GetObjFile(file));
         }
+
+        protected String GetObjFile(String file)
+        {
+            return NamesConverter.GetShortPath(Utils.Path(IntermediateDirectory,
+                                                          Utils.FileName(Utils.GetFileNameExcludingExtension(file),
+                                                                         IntermediateFileExtension)));
+        } 
 
         protected void DeleteFile(String fileName)
         {
@@ -135,6 +141,25 @@ namespace PSXBuildService
 
         protected bool OnCompilationStartMessage(CompilationStartMessage message)
         {
+            var returnCode = 0;
+            var outputBuffer = new StringBuilder();
+            foreach (var file in FilesToCompile)
+            {
+                Server.SendLog("Compiling file {0}", Utils.GetFileName(file));
+                var process = new Process("ccpsx.exe", "-c", file, "-o", GetObjFile(file));
+                returnCode = process.Run(Logger);                
+                if (returnCode != 0)
+                {
+                    outputBuffer.AppendLine(BuildMessageConverter.ConvertMessage(process.Output, file));                    
+                    break;
+                }
+            }
+
+            var compilationResultMessage = new CompilationResultMessage();
+            compilationResultMessage.ReturnCode = returnCode;
+            compilationResultMessage.Output     = outputBuffer.ToString();
+
+            Server.SendMessage(compilationResultMessage);
             return true;
         }
     }

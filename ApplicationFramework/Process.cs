@@ -75,6 +75,7 @@ namespace ApplicationFramework
         {
             var str = "" + e.Data;
             outputBuffer.Append(str);
+            outputBuffer.Append("\n");
         }
 
         private StringBuilder outputBuffer = new StringBuilder();

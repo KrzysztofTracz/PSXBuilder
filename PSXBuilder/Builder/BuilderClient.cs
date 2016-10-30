@@ -79,6 +79,9 @@ namespace PSXBuilder
             Client.SendMessage(new CompilationStartMessage());
             var compilationResult = Client.WaitForMessage<CompilationResultMessage>();
 
+            result = compilationResult.ReturnCode == 0;
+            Logger.Log(compilationResult.Output);
+
             return result;
         }
 
