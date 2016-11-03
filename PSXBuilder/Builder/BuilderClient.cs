@@ -52,8 +52,6 @@ namespace PSXBuilder
             List<PSXProject.File> filesToUpload;
             List<String>          filesToRemove;
 
-            Client.Connect();
-
             var user    = Environment.MachineName;
             var project = Project.Name;
 
@@ -66,6 +64,7 @@ namespace PSXBuilder
                 return BuildInfo.Successful;
             }
 
+            Client.Connect();
             Logger.Log("Starting build session. User: {0}, Project: {1}.", user, project);
             BuildInfo.Time = DateTime.Now;
 

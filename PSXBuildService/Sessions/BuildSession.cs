@@ -29,6 +29,7 @@ namespace PSXBuildService
         public List<String> FilesToCompile { get; protected set; }
 
         public BuildMessageConverter MessageConverter { get; protected set; }
+        public CompilationInfo       CompilationInfo  { get; protected set; }
 
         public BuildSession()
         {
@@ -65,10 +66,16 @@ namespace PSXBuildService
 
             MessageConverter = new BuildMessageConverter(NamesConverter.GetShortPath(RootDirectory), originalRootDirectory,
                                                          NamesConverter.GetShortPath(sdkDirectory),  originalSDKDirectory);
+
+            CompilationInfo = new CompilationInfo();
+            CompilationInfo.Initialize(Project,
+                                       NamesConverter.GetShortPath(RootDirectory),
+                                       Logger);
         }
 
         public override void Start()
         {
+            CompilationInfo.Load();
             Server.SendMessage(new BuildSessionStartedMessage());
             Logger.Log("Build session started. User {0}, Project {1}", User, Project);
         }
@@ -117,6 +124,7 @@ namespace PSXBuildService
             foreach (var file in files)
             {
                 var convertedFileName = NamesConverter.GetShortPath(GetFullPath(file));
+                CompilationInfo.Remove(convertedFileName);
                 DeleteFile(convertedFileName);
                 RemoveObjFile(convertedFileName);
             }
@@ -156,7 +164,7 @@ namespace PSXBuildService
 
             if(message.Compile)
             {
-                FilesToCompile.Add(fileName);
+                CompilationInfo.Add(fileName);
             }
 
             return true;
@@ -166,7 +174,7 @@ namespace PSXBuildService
         {
             var returnCode = 0;
             var outputBuffer = new StringBuilder();
-            foreach (var file in FilesToCompile)
+            foreach (var file in CompilationInfo.Files)
             {
                 Server.SendLog("Compiling file: {0}", Utils.GetFileName(file));
                 var process = new Process("ccpsx.exe", "-c", file, "-o", GetObjFile(file));
@@ -176,7 +184,10 @@ namespace PSXBuildService
                     outputBuffer.AppendLine(MessageConverter.ConvertMessage(process.Output));                    
                     break;
                 }
+                CompilationInfo.MarkAsCompiled(file);
             }
+
+            CompilationInfo.FlushCompiledFiles();
 
             var resultMessage = new CompilationResultMessage();
             resultMessage.ReturnCode = returnCode;

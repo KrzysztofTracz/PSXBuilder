@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildMessageConverter.cs" />
+    <Compile Include="CompilationInfo.cs" />
     <Compile Include="Sessions\BuildSession.cs" />
     <Compile Include="Sessions\CleanSession.cs" />
     <Compile Include="Program.cs" />
