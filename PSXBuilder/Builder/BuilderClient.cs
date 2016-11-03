@@ -57,20 +57,28 @@ namespace PSXBuilder
             var user    = Environment.MachineName;
             var project = Project.Name;
 
+            PrepareFiles(out filesToUpload, out filesToRemove);
+
+            if (filesToUpload.Count == 0 && 
+                filesToRemove.Count == 0)
+            {
+                Logger.Log("Skipping build. No changes detected in project files. Project: {0}", project);
+                return BuildInfo.Successful;
+            }
+
             Logger.Log("Starting build session. User: {0}, Project: {1}.", user, project);
+            BuildInfo.Time = DateTime.Now;
+
             var buildSessionStartMessage = new BuildSessionStartMessage();
             buildSessionStartMessage.User        = user;
             buildSessionStartMessage.Project     = project;
             buildSessionStartMessage.Output      = Utils.GetFileNameExcludingExtension(Project.OutputFileName);
             buildSessionStartMessage.ProjectPath = Project.Directory;
             buildSessionStartMessage.SDKPath     = SDKPath;
-
+            
             Client.SendMessage(buildSessionStartMessage);
             Client.WaitForMessage<BuildSessionStartedMessage>();
             Logger.Log("Build session started.");
-
-            PrepareFiles(out filesToUpload, out filesToRemove);
-            SaveBuildInfo();
 
             Client.SendMessage(new RemoveFilesMessage(filesToRemove));
 
@@ -117,6 +125,9 @@ namespace PSXBuilder
                 Logger.Log("Binaries downloaded.");
                 result = true;
             }
+
+            BuildInfo.Successful = result;
+            SaveBuildInfo();
 
             return result;
         }
@@ -182,8 +193,7 @@ namespace PSXBuilder
         }
 
         protected void SaveBuildInfo()
-        {
-            BuildInfo.Time = DateTime.Now;
+        {            
             BuildInfo.Save(Project.IntermediateDir);
         }
     }

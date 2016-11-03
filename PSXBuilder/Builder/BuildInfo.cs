@@ -11,14 +11,16 @@ namespace PSXBuilder
     {
         public const String FileName = "PSXBuilder.lastbuild";
 
-        public const String XMLRootElement   = "LastBuild";
-        public const String XMLFileElement   = "File";
-        public const String XMLTimeAttribute = "time"; 
+        public const String XMLRootElement     = "LastBuild";
+        public const String XMLFileElement     = "File";
+        public const String XMLTimeAttribute   = "time";
+        public const String XMLStatusAttribute = "successful";
 
         public const String XMLIndentChars = "\t";
 
-        public List<String> Files { get; set; }
-        public DateTime     Time  { get; set; }
+        public List<String> Files      { get; set; }
+        public DateTime     Time       { get; set; }
+        public bool         Successful { get; set; }
 
         public ILogger Logger { get; protected set; }
 
@@ -45,7 +47,8 @@ namespace PSXBuilder
                             case XmlNodeType.Element:
                                 if (xmlReader.Name == XMLRootElement)
                                 {
-                                    Time = DateTime.Parse(xmlReader.GetAttribute(XMLTimeAttribute));
+                                    Time       = DateTime.Parse(xmlReader.GetAttribute(XMLTimeAttribute));
+                                    Successful = bool.Parse(xmlReader.GetAttribute(XMLStatusAttribute));
                                 }
                                 else if (xmlReader.Name == XMLFileElement)
                                 {
@@ -84,6 +87,7 @@ namespace PSXBuilder
                 xmlWriter.WriteStartDocument();
                 xmlWriter.WriteStartElement(XMLRootElement);
                 xmlWriter.WriteAttributeString(XMLTimeAttribute, Time.ToString());
+                xmlWriter.WriteAttributeString(XMLStatusAttribute, Successful.ToString());
                 foreach(var file in Files)
                 {
                     xmlWriter.WriteElementString(XMLFileElement, file);
