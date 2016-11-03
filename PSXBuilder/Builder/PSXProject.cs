@@ -176,6 +176,7 @@ namespace PSXBuilder
 
         public String Name       { get; protected set; }
         public String FileName   { get; protected set; }
+        public String Directory  { get; protected set; }
 
         public String IntermediateDir { get; protected set; }
 
@@ -210,7 +211,9 @@ namespace PSXBuilder
 
                 Name     = Utils.GetFileNameExcludingExtension(fileName);
                 FileName = fileName;
-                
+
+                Directory       = project.GetPropertyValue("MSBuildProjectDirectory");
+
                 OutputFile      = project.GetPropertyValue("TargetPath");
                 OutputFileName  = project.GetPropertyValue("TargetFileName");
 

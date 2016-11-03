@@ -17,6 +17,8 @@ namespace PSXBuilder
         public Client  Client { get; protected set; }
         public ILogger Logger { get; protected set; }
 
+        public String SDKPath { get; protected set; }
+
         public BuilderClient()
         {
             Project   = null;
@@ -24,7 +26,10 @@ namespace PSXBuilder
             Client    = null;
         }
 
-        public void Initialize(PSXProject project, String buildMachineAddress, ILogger logger)
+        public void Initialize(PSXProject project, 
+                               String buildMachineAddress, 
+                               ILogger logger, 
+                               String sdkPath)
         {
             Project = project;
 
@@ -36,6 +41,8 @@ namespace PSXBuilder
             Client.Inititalize(buildMachineAddress, logger);
 
             Logger = logger;
+
+            SDKPath = sdkPath;
         }
 
         public bool Build()
@@ -52,9 +59,11 @@ namespace PSXBuilder
 
             Logger.Log("Starting build session. User: {0}, Project: {1}.", user, project);
             var buildSessionStartMessage = new BuildSessionStartMessage();
-            buildSessionStartMessage.User    = user;
-            buildSessionStartMessage.Project = project;
-            buildSessionStartMessage.Output  = Utils.GetFileNameExcludingExtension(Project.OutputFileName);
+            buildSessionStartMessage.User        = user;
+            buildSessionStartMessage.Project     = project;
+            buildSessionStartMessage.Output      = Utils.GetFileNameExcludingExtension(Project.OutputFileName);
+            buildSessionStartMessage.ProjectPath = Project.Directory;
+            buildSessionStartMessage.SDKPath     = SDKPath;
 
             Client.SendMessage(buildSessionStartMessage);
             Client.WaitForMessage<BuildSessionStartedMessage>();

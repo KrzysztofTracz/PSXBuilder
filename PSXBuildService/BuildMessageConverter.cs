@@ -6,67 +6,180 @@ using ApplicationFramework;
 
 namespace PSXBuildService
 {
-    public static class BuildMessageConverter
+    public class BuildMessageConverter
     {
-        public static String ConvertMessage(String message, String file)
+        protected class Message
         {
-            var result = new StringBuilder();
-            var output = new Dictionary<int, StringBuilder>();
+            public enum EFileOrigin
+            {
+                Unknown,
+                Project,
+                SDK
+            }
+
+            public enum EType
+            {
+                Unknown,
+                Warning,
+                Error
+            }
+
+            public int           Line       = -1;
+            public String        File       = "";
+            public EFileOrigin   FileOrigin = EFileOrigin.Unknown; 
+            public EType         Type       = EType.Unknown;
+            public StringBuilder Buffer     = new StringBuilder();
+
+            public static String ToString(EType type)
+            {
+                var result = "";
+                switch(type)
+                {
+                case EType.Error:
+                    result = "error :";
+                    break;
+                case EType.Warning:
+                    result = "warning :";
+                    break;
+                }
+                return result;
+            }
+        }
+
+        public const String WarningSignature = " warning:";
+
+        public String LocalProjectPath { get; protected set; }
+        public String LocalSDKPath     { get; protected set; }
+
+        public String OriginalProjectPath { get; protected set; }
+        public String OriginalSDKPath     { get; protected set; }
+
+        public BuildMessageConverter(String localProjectPath,
+                                     String originalProjectPath,
+                                     String localSDKPath,
+                                     String originalSDKPath)
+        {
+            LocalProjectPath    = localProjectPath.Replace('\\', '/') + "/";
+            OriginalProjectPath = originalProjectPath + "\\";
+
+            LocalSDKPath    = localSDKPath + "\\";
+            OriginalSDKPath = originalSDKPath + "\\";
+        }
+
+        public String ConvertMessage(String message)
+        {
+            var result   = new StringBuilder();
+            var messages = new List<Message>();
             
             var lines    = message.Split('\n');
-            var fileName = Utils.GetFileName(file);
-
-            file = file.Replace('\\', '/');
-
-            System.Console.WriteLine(">> lines: " + lines.Length);
-            System.Console.WriteLine(">> " + file);
 
             foreach (var line in lines)
             {
-                if (line.StartsWith(file))
-                {
-                    System.Console.WriteLine(">> " + line);
+                var fileOrigin = Message.EFileOrigin.Unknown;
+                var index      = -1;
 
-                    var index  = file.Length + 1;
+                if (line.StartsWith(LocalProjectPath))
+                {
+                    fileOrigin = Message.EFileOrigin.Project;
+                    index = LocalProjectPath.Length;
+                }
+                else if(line.StartsWith(LocalSDKPath))
+                {
+                    fileOrigin = Message.EFileOrigin.SDK;
+                    index = LocalSDKPath.Length;
+                }
+
+                if (fileOrigin != Message.EFileOrigin.Unknown)
+                {
                     var buffer = new StringBuilder();
-                    while(index < line.Length && line[index] != ':')
+                    while (index < line.Length && line[index] != ':')
                     {
                         buffer.Append(line[index]);
                         index++;
                     }
 
-                    System.Console.WriteLine(">> " + buffer.ToString());
+                    var fileName = buffer.ToString();
+                    buffer.Clear();
+                    index++;
 
-                    int lineNumber;
+                    while (index < line.Length && line[index] != ':')
+                    {
+                        buffer.Append(line[index]);
+                        index++;
+                    }
+
+                    int lineNumber = -1;
                     if(int.TryParse(buffer.ToString(), out lineNumber) && index < line.Length)
                     {
-                        
-
                         var str = line.Substring(index + 1, line.Length - (index + 1));
-                        if(output.ContainsKey(lineNumber))
+                        var messageType = Message.EType.Error;
+
+
+                        if(str.StartsWith(WarningSignature))
                         {
-                            output[lineNumber].Append(' ');
-                            output[lineNumber].Append(str);
+                            messageType = Message.EType.Warning;
+                            str = str.Substring(WarningSignature.Length, str.Length - WarningSignature.Length);
                         }
-                        else
+
+                        bool createNew = true;
+                        foreach (var m in messages)
                         {
-                            output.Add(lineNumber, new StringBuilder(str));
+                            if (m.FileOrigin == fileOrigin  &&
+                                m.File       == fileName    &&
+                                m.Type       == messageType &&
+                                m.Line       == lineNumber)
+                            {
+                                m.Buffer.Append(str);
+                                createNew = false;
+                                break;
+                            }
+                        }
+
+                        if(createNew)
+                        {
+                            var newMessage = new Message();
+                            newMessage.FileOrigin = fileOrigin;
+                            newMessage.File       = fileName;
+                            newMessage.Type       = messageType;
+                            newMessage.Line       = lineNumber;
+                            newMessage.Buffer.Append(str);
+
+                            messages.Add(newMessage);
                         }
                     }
                 }
             }
 
-            var keys = output.Keys.ToList();
-            keys.Sort();
-
-            foreach (var key in keys)
+            foreach (var m in messages)
             {
-                result.Append(String.Format("{0}({1}) : error : {2} \n", fileName, 
-                                                                         key, 
-                                                                         output[key].ToString()));
+                m.File = m.File.Replace('/', '\\');
+
+                var str = String.Format("{0}{1}({2}) : {3}{4} \n", GetOriginalRootPath(m.FileOrigin),
+                                                                   m.File,
+                                                                   m.Line,
+                                                                   Message.ToString(m.Type),
+                                                                   m.Buffer.ToString());
+                //System.Console.WriteLine(str);
+                result.Append(str);
             }
 
             return result.ToString();
         }
+
+        protected String GetOriginalRootPath(Message.EFileOrigin fileOrigin)
+        {
+            var result = "";
+            switch(fileOrigin)
+            {
+            case Message.EFileOrigin.Project:
+                result = OriginalProjectPath;
+                break;
+            case Message.EFileOrigin.SDK:
+                result = OriginalSDKPath;
+                break;
+            }
+            return result;
+        }
+
     }
 }

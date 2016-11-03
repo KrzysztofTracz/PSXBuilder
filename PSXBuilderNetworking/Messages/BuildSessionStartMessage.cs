@@ -8,10 +8,18 @@ namespace PSXBuilderNetworking.Messages
 {
     public class BuildSessionStartMessage : SessionStartMessage
     {
-        public String Output { get; set; }
+        public String ProjectPath { get; set; }
+        public String SDKPath     { get; set; }
+        public String Output      { get; set; }
 
         protected override void AppendData(ByteArrayWriter writer)
         {
+            writer.Append(GetStringSize(ProjectPath));
+            writer.Append(ProjectPath);
+
+            writer.Append(GetStringSize(SDKPath));
+            writer.Append(SDKPath);
+
             writer.Append(GetStringSize(Output));
             writer.Append(Output);
             base.AppendData(writer);
@@ -19,13 +27,17 @@ namespace PSXBuilderNetworking.Messages
 
         protected override int GetDataSize()
         {
-            return sizeof(int) + GetStringSize(Output) +
+            return sizeof(int) + GetStringSize(Output)      +
+                   sizeof(int) + GetStringSize(ProjectPath) +
+                   sizeof(int) + GetStringSize(SDKPath)     +
                    base.GetDataSize();
         }
 
         protected override void ReadData(ByteArrayReader reader)
         {
-            Output = reader.ReadString(reader.ReadInt());
+            ProjectPath = reader.ReadString(reader.ReadInt());
+            SDKPath     = reader.ReadString(reader.ReadInt());
+            Output      = reader.ReadString(reader.ReadInt());
             base.ReadData(reader);
         }
     }

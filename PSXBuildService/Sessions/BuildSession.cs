@@ -28,6 +28,8 @@ namespace PSXBuildService
 
         public List<String> FilesToCompile { get; protected set; }
 
+        public BuildMessageConverter MessageConverter { get; protected set; }
+
         public BuildSession()
         {
             IntermediateDirectory = "";
@@ -40,6 +42,9 @@ namespace PSXBuildService
         public void Initialize(String user,
                                String project,
                                String rootDirectory,
+                               String sdkDirectory,
+                               String originalRootDirectory,
+                               String originalSDKDirectory,
                                String output,
                                Server server,
                                ILogger logger)
@@ -57,6 +62,9 @@ namespace PSXBuildService
             PrepareDirectories();
 
             FilesToCompile = new List<String>();
+
+            MessageConverter = new BuildMessageConverter(NamesConverter.GetShortPath(RootDirectory), originalRootDirectory,
+                                                         NamesConverter.GetShortPath(sdkDirectory),  originalSDKDirectory);
         }
 
         public override void Start()
@@ -165,7 +173,7 @@ namespace PSXBuildService
                 returnCode = process.Run(Logger);                
                 if (returnCode != 0)
                 {
-                    outputBuffer.AppendLine(BuildMessageConverter.ConvertMessage(process.Output, file));                    
+                    outputBuffer.AppendLine(MessageConverter.ConvertMessage(process.Output));                    
                     break;
                 }
             }

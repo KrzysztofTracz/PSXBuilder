@@ -163,7 +163,7 @@ namespace ApplicationFramework
 
         protected void WriteLineToFile(String text)
         {
-            var bytes = Encoding.ASCII.GetBytes(String.Format("{0}\r\n", text));
+            var bytes = Encoding.ASCII.GetBytes(text + "\r\n");
             _file.Write(bytes, 0, bytes.Length);
             _file.Flush();
         }

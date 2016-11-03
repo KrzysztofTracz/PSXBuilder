@@ -17,7 +17,8 @@ namespace PSXBuilder
                 var builder = new BuilderClient();
                 builder.Initialize(project, 
                                    Application.NetworkingSystem.GetConnectionAddress(), 
-                                   Application.Console);
+                                   Application.Console,
+                                   Application.SDKPath);
 
                 result = builder.Build();
             }
