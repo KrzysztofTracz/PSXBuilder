@@ -48,29 +48,35 @@ namespace PSXBuildService
 
         public const String WarningSignature = " warning:";
 
-        public String LocalProjectPath { get; protected set; }
-        public String LocalSDKPath     { get; protected set; }
+        public String LocalProjectPath    { get; protected set; }
+        public String LocalProjectPathAlt { get; protected set; }
+        public String LocalSDKPath        { get; protected set; }
 
         public String OriginalProjectPath { get; protected set; }
         public String OriginalSDKPath     { get; protected set; }
 
+        public DOSNamesConverter NamesConverter { get; protected set; }
+
         public BuildMessageConverter(String localProjectPath,
                                      String originalProjectPath,
                                      String localSDKPath,
-                                     String originalSDKPath)
+                                     String originalSDKPath,
+                                     DOSNamesConverter namesConverter)
         {
-            LocalProjectPath    = localProjectPath.Replace('\\', '/') + "/";
+            NamesConverter = namesConverter;
+
+            LocalProjectPathAlt = NamesConverter.GetShortPath(localProjectPath) + "\\";
+            LocalProjectPath    = LocalProjectPathAlt.Replace('\\', '/');
             OriginalProjectPath = originalProjectPath + "\\";
 
-            LocalSDKPath    = localSDKPath + "\\";
-            OriginalSDKPath = originalSDKPath + "\\";
+            LocalSDKPath    = NamesConverter.GetShortPath(localSDKPath) + "\\";
+            OriginalSDKPath = originalSDKPath + "\\";            
         }
 
         public String ConvertMessage(String message)
         {
             var result   = new StringBuilder();
             var messages = new List<Message>();
-            
             var lines    = message.Split('\n');
 
             foreach (var line in lines)
@@ -78,16 +84,7 @@ namespace PSXBuildService
                 var fileOrigin = Message.EFileOrigin.Unknown;
                 var index      = -1;
 
-                if (line.StartsWith(LocalProjectPath))
-                {
-                    fileOrigin = Message.EFileOrigin.Project;
-                    index = LocalProjectPath.Length;
-                }
-                else if(line.StartsWith(LocalSDKPath))
-                {
-                    fileOrigin = Message.EFileOrigin.SDK;
-                    index = LocalSDKPath.Length;
-                }
+                fileOrigin = DetectFileOrigin(line, out index);
 
                 if (fileOrigin != Message.EFileOrigin.Unknown)
                 {
@@ -155,7 +152,7 @@ namespace PSXBuildService
                 m.File = m.File.Replace('/', '\\');
 
                 var str = String.Format("{0}{1}({2}) : {3}{4} \n", GetOriginalRootPath(m.FileOrigin),
-                                                                   m.File,
+                                                                   NamesConverter.GetLongPath(m.File),
                                                                    m.Line,
                                                                    Message.ToString(m.Type),
                                                                    m.Buffer.ToString());
@@ -164,6 +161,28 @@ namespace PSXBuildService
             }
 
             return result.ToString();
+        }
+
+        protected Message.EFileOrigin DetectFileOrigin(String line, out int index)
+        {
+            Message.EFileOrigin result = Message.EFileOrigin.Unknown;
+            index = -1;
+            if (line.StartsWith(LocalProjectPath))
+            {
+                result = Message.EFileOrigin.Project;
+                index  = LocalProjectPath.Length;
+            }
+            else if (line.StartsWith(LocalProjectPathAlt))
+            {
+                result = Message.EFileOrigin.Project;
+                index = LocalProjectPathAlt.Length;
+            }
+            else if (line.StartsWith(LocalSDKPath))
+            {
+                result = Message.EFileOrigin.SDK;
+                index  = LocalSDKPath.Length;
+            }
+            return result;
         }
 
         protected String GetOriginalRootPath(Message.EFileOrigin fileOrigin)

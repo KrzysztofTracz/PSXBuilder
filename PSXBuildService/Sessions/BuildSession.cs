@@ -64,8 +64,9 @@ namespace PSXBuildService
 
             FilesToCompile = new List<String>();
 
-            MessageConverter = new BuildMessageConverter(NamesConverter.GetShortPath(RootDirectory), originalRootDirectory,
-                                                         NamesConverter.GetShortPath(sdkDirectory),  originalSDKDirectory);
+            MessageConverter = new BuildMessageConverter(RootDirectory, originalRootDirectory,
+                                                         sdkDirectory,  originalSDKDirectory,
+                                                         NamesConverter);
 
             CompilationInfo = new CompilationInfo();
             CompilationInfo.Initialize(Project,
