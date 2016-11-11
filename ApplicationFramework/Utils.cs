@@ -175,8 +175,71 @@ namespace ApplicationFramework
             return String.Format("\"{0}\"", text);
         }
 
+        public static String TrimComments(String text)
+        {
+            var buffer     = new StringBuilder();
+            var skipBuffer = true;
+            var prevChar   = (char)0;
+
+            for (int i = 0; i < text.Length; ++i)
+            {
+                var currChar   = text[i];
+                    skipBuffer = false;
+
+                if (currChar == '/' && prevChar == '/')
+                {
+                    while (i < text.Length && text[i] != '\n') ++i;
+                    skipBuffer = true;
+                }
+                else if(currChar == '*' && prevChar == '/')
+                {
+                    while (i < text.Length - 1 && text[i] != '*' && text[i + 1] != '/') ++i;
+                    ++i;
+                    skipBuffer = true;
+                }
+
+                if (!skipBuffer && prevChar != (char)0)
+                {
+                    buffer.Append(prevChar);
+                }
+
+                if(i < text.Length)
+                {
+                    prevChar = text[i];
+                }                
+            }
+
+            if(!skipBuffer)
+            {
+                buffer.Append(text[text.Length - 1]);
+            }
+
+            return buffer.ToString();
+        }
+
         public const char DirectorySeparator = '\\';
 
         public static readonly char[] UnacceptableFileNameCharacters = { '/', '\\', ':', '|', '*', '?', '"', '<', '>' };
+
+        public static String TrimPath(String path)
+        {
+            var directories = new List<String>(path.Split(DirectorySeparator));
+
+            for(int i = 1; i < directories.Count;)
+            {
+                var directory = directories[i];
+                if(directory == "..")
+                {
+                    directories.RemoveAt(i - 1);
+                    directories.RemoveAt(i - 1);
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+            
+            return Utils.Path(directories.ToArray());
+        }
     }
 }

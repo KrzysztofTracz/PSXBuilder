@@ -26,9 +26,11 @@ namespace PSXBuilder
             public String   Extension    { get; protected set; }
             public String   FullName     { get; protected set; }
 
-            public FileType Type         { get; protected set; }
+            public FileType     Type         { get; protected set; }
+            public DateTime     LastModified { get; protected set; }
+            public List<String> Dependencies { get; protected set; }
 
-            public DateTime LastModified { get; protected set; }
+            public const String Include = "#include";
 
             public File(String root, String localPath, FileType type)
             {
@@ -39,9 +41,42 @@ namespace PSXBuilder
                 Extension = Utils.GetFileExtension(Path);
                 FullName  = Utils.GetFileName(Path);
 
-                Type = type;
-
+                Type         = type;
                 LastModified = new System.IO.FileInfo(Path).LastWriteTime;
+                Dependencies = ReadDependencies(Path);
+            }
+
+            protected List<String> ReadDependencies(String path)
+            {
+                var result = new List<String>();
+                var text   = Utils.TrimComments(System.IO.File.ReadAllText(path));
+
+                int searchStartIndex = 0;
+                int index            = -1;
+
+                while ((index = text.IndexOf(Include, searchStartIndex)) != -1)
+                {
+                    var lineStart = index + Include.Length;
+                    var lineEnd   = text.IndexOf('\n', index);
+
+                    if (lineEnd  == -1) break;
+
+                    searchStartIndex = lineEnd;
+
+                    var line = text.Substring(lineStart, lineEnd - lineStart);
+
+                    var quoteStart = line.IndexOf('"');
+                    if(quoteStart != -1 && quoteStart < line.Length - 1)
+                    {
+                        var quoteEnd = line.IndexOf('"', quoteStart + 1);
+                        if(quoteEnd != -1)
+                        {
+                            result.Add(line.Substring(quoteStart + 1, quoteEnd - (quoteStart + 1)));
+                        }
+                    }
+                }
+
+                return result;
             }
 
             public static String GetClType(FileType type)
@@ -229,12 +264,17 @@ namespace PSXBuilder
 
         public bool Contains(String localPath)
         {
-            bool result = false;
+            return GetFile(localPath) != null;
+        }
+
+        public File GetFile(String localPath)
+        {
+            File result = null;
             foreach (var file in Files)
             {
                 if (file.LocalPath == localPath)
                 {
-                    result = true;
+                    result = file;
                     break;
                 }
             }

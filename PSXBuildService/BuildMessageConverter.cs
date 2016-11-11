@@ -86,12 +86,8 @@ namespace PSXBuildService
 
                 fileOrigin = DetectFileOrigin(line, out index);
 
-                System.Console.WriteLine(">>0 " + line);
-
                 if (fileOrigin != Message.EFileOrigin.Unknown)
                 {
-                    System.Console.WriteLine(">>1 " + line);
-
                     var buffer = new StringBuilder();
                     while (index < line.Length && line[index] != ':')
                     {
@@ -112,8 +108,6 @@ namespace PSXBuildService
                     int lineNumber = -1;
                     if(int.TryParse(buffer.ToString(), out lineNumber) && index < line.Length)
                     {
-                        System.Console.WriteLine(">>2 " + line);
-
                         var str = line.Substring(index + 1, line.Length - (index + 1));
                         var messageType = Message.EType.Error;
 

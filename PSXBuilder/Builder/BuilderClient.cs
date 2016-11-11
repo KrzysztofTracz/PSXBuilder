@@ -49,16 +49,18 @@ namespace PSXBuilder
         {
             bool result = false;
 
-            List<PSXProject.File> filesToUpload;
-            List<String>          filesToRemove;
+            List<String> filesToUpload;
+            List<String> filesToRemove;
+            List<String> filesToCompile;
 
             var user    = Environment.MachineName;
             var project = Project.Name;
 
-            PrepareFiles(out filesToUpload, out filesToRemove);
+            PrepareFiles(out filesToUpload, out filesToRemove, out filesToCompile);
 
-            if (filesToUpload.Count == 0 && 
-                filesToRemove.Count == 0)
+            if (filesToUpload.Count  == 0 && 
+                filesToRemove.Count  == 0 &&
+                filesToCompile.Count == 0)
             {
                 Logger.Log("Skipping build. No changes detected in project files. Project: {0}", project);
                 return BuildInfo.Successful;
@@ -84,14 +86,15 @@ namespace PSXBuilder
             foreach(var file in filesToUpload)
             {
                 var fileUploadMessage = new ProjectFileUploadMessage();
-                fileUploadMessage.Compile  = file.Type == PSXProject.FileType.Source;
-                fileUploadMessage.FileName = file.LocalPath;
-                fileUploadMessage.File     = System.IO.File.ReadAllBytes(file.Path);
+                fileUploadMessage.FileName = file;
+                fileUploadMessage.File     = System.IO.File.ReadAllBytes(Utils.Path(Project.Directory, file));
 
                 Logger.Log("Uploading file {0} [{1} bytes].", fileUploadMessage.FileName,
                                                               fileUploadMessage.File.Length);
                 Client.SendMessage(fileUploadMessage);
             }
+
+            Client.SendMessage(new CompileFilesMessage(filesToCompile));
 
             bool startLinker      = false;
             bool createExecutable = false;
@@ -155,26 +158,70 @@ namespace PSXBuilder
             return true;
         }
 
-        protected void PrepareFiles(out List<PSXProject.File> filesToUpload, out List<String> filesToRemove)
+        protected void CheckFile(PSXProject.File file, out bool modified, out bool dependencyModified, List<String> cycleGuard = null)
         {
-            filesToUpload = new List<PSXProject.File>();
-            filesToRemove = new List<String>();
+            modified           = false;
+            dependencyModified = false;
 
-            foreach (var file in Project.Files)
+            if (cycleGuard == null)
             {
-                bool pushFile = false;
+                cycleGuard = new List<String>();
+            }
+
+            if (!cycleGuard.Contains(file.LocalPath))
+            {
                 if (!BuildInfo.Files.Contains(file.LocalPath))
                 {
-                    pushFile = true;
+                    modified = true;
                 }
                 else if (file.LastModified > BuildInfo.Time)
                 {
-                    pushFile = true;
+                    modified = true;
                 }
+                else
+                {
+                    foreach (var dependency in file.Dependencies)
+                    {
+                        bool m = false;
+                        bool d = false;
+
+                        cycleGuard.Add(file.LocalPath);
+
+                        CheckFile(Project.GetFile(Utils.TrimPath(Utils.Path(Utils.GetDirectory(file.LocalPath), dependency))), 
+                                  out m, 
+                                  out d, 
+                                  cycleGuard);
+
+                        if (m || d)
+                        {
+                            dependencyModified = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        protected void PrepareFiles(out List<String> filesToUpload, out List<String> filesToRemove, out List<String> filesToCompile)
+        {
+            filesToUpload  = new List<String>();
+            filesToRemove  = new List<String>();
+            filesToCompile = new List<String>();
+
+            foreach (var file in Project.Files)
+            {
+                bool pushFile    = false;
+                bool compileFile = false;
+
+                CheckFile(file, out pushFile, out compileFile);
 
                 if (pushFile)
                 {
-                    filesToUpload.Add(file);
+                    filesToUpload.Add(file.LocalPath);
+                }
+
+                if(file.Type == PSXProject.FileType.Source && (pushFile || compileFile))
+                {
+                    filesToCompile.Add(file.LocalPath);
                 }
             }
 

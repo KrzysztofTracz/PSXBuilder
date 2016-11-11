@@ -102,6 +102,7 @@ namespace PSXBuildService
         {
             Server.RegisterDelegate<RemoveFilesMessage>(OnRemoveFilesMessage);
             Server.RegisterDelegate<ProjectFileUploadMessage>(OnProjectFileUploadMessage);
+            Server.RegisterDelegate<CompileFilesMessage>(OnCompileFilesMessage);
             Server.RegisterDelegate<CompilationStartMessage>(OnCompilationStartMessage);
             Server.RegisterDelegate<LinkingProcessStartMessage>(OnLinkingProcessStartMessage);
             Server.RegisterDelegate<CreateExecutableMessage>(OnCreateExecutableMessage);
@@ -112,6 +113,7 @@ namespace PSXBuildService
         {
             Server.UnregisterDelegate<RemoveFilesMessage>();
             Server.UnregisterDelegate<ProjectFileUploadMessage>();
+            Server.UnregisterDelegate<CompileFilesMessage>();
             Server.UnregisterDelegate<CompilationStartMessage>();
             Server.UnregisterDelegate<LinkingProcessStartMessage>();
             Server.UnregisterDelegate<CreateExecutableMessage>();
@@ -128,6 +130,19 @@ namespace PSXBuildService
                 CompilationInfo.Remove(convertedFileName);
                 DeleteFile(convertedFileName);
                 RemoveObjFile(convertedFileName);
+            }
+
+            return true;
+        }
+
+        protected bool OnCompileFilesMessage(CompileFilesMessage message)
+        {
+            var files = message.Files;
+
+            foreach (var file in files)
+            {
+                var convertedFileName = NamesConverter.GetShortPath(GetFullPath(file));
+                CompilationInfo.Add(convertedFileName);
             }
 
             return true;
@@ -164,11 +179,6 @@ namespace PSXBuildService
             var filestream = Utils.CreateFile(fileName);
             filestream.Write(message.File, 0, message.File.Length);
             filestream.Close();
-
-            if(message.Compile)
-            {
-                CompilationInfo.Add(fileName);
-            }
 
             return true;
         }
@@ -225,7 +235,7 @@ namespace PSXBuildService
 
             for(int i=0;i<files.Length;i++)
             {
-                files[i] = Utils.GetFileName(files[i]);
+                files[i] = NamesConverter.GetLongPath(Utils.ConvertPathToLocal(files[i], NamesConverter.GetShortPath(IntermediateDirectory)));
             }
 
             Server.SendLog("Linking files: {0}", Utils.ConcatArguments(", ", files));
