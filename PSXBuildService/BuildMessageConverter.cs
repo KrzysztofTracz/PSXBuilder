@@ -86,8 +86,12 @@ namespace PSXBuildService
 
                 fileOrigin = DetectFileOrigin(line, out index);
 
+                System.Console.WriteLine(">>0 " + line);
+
                 if (fileOrigin != Message.EFileOrigin.Unknown)
                 {
+                    System.Console.WriteLine(">>1 " + line);
+
                     var buffer = new StringBuilder();
                     while (index < line.Length && line[index] != ':')
                     {
@@ -108,6 +112,8 @@ namespace PSXBuildService
                     int lineNumber = -1;
                     if(int.TryParse(buffer.ToString(), out lineNumber) && index < line.Length)
                     {
+                        System.Console.WriteLine(">>2 " + line);
+
                         var str = line.Substring(index + 1, line.Length - (index + 1));
                         var messageType = Message.EType.Error;
 
@@ -147,15 +153,19 @@ namespace PSXBuildService
                 }
             }
 
-            foreach (var m in messages)
+            for (int i = 0; i < messages.Count; i++)
             {
+                var m = messages[i];
                 m.File = m.File.Replace('/', '\\');
 
-                var str = String.Format("{0}{1}({2}) : {3}{4} \n", GetOriginalRootPath(m.FileOrigin),
-                                                                   NamesConverter.GetLongPath(m.File),
-                                                                   m.Line,
-                                                                   Message.ToString(m.Type),
-                                                                   m.Buffer.ToString());
+                var str = String.Format("{0}{1}({2}) : {3}{4}{5}", 
+                                        GetOriginalRootPath(m.FileOrigin),
+                                        NamesConverter.GetLongPath(m.File),
+                                        m.Line,
+                                        Message.ToString(m.Type),
+                                        m.Buffer.ToString(),
+                                        i < messages.Count - 1 ? "\n" : "");
+
                 //System.Console.WriteLine(str);
                 result.Append(str);
             }

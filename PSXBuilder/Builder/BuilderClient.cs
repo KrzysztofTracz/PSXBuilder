@@ -97,6 +97,8 @@ namespace PSXBuilder
             bool createExecutable = false;
             bool downloadBinaries = false;
 
+            Logger.Log("");
+
             startLinker = StartRemoteProcess<CompilationStartMessage, 
                                              CompilationResultMessage>
                                             ("Starting compilation.");

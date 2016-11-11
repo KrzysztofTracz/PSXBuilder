@@ -184,12 +184,20 @@ namespace PSXBuildService
 
                 Server.SendLog("Compiling file: {0}", Utils.GetFileName(file));               
                 var process = new Process("ccpsx.exe", "-c", file, "-o", objFile);
-                returnCode = process.Run(Logger);                
+                returnCode = process.Run(Logger);
+
+                var compilationMessage = MessageConverter.ConvertMessage(process.Output);
+
                 if (returnCode != 0)
                 {
-                    outputBuffer.AppendLine(MessageConverter.ConvertMessage(process.Output));                    
+                    outputBuffer.AppendLine(compilationMessage);
                     break;
                 }
+                else if (!String.IsNullOrEmpty(compilationMessage))
+                {
+                    Server.SendLog(compilationMessage);
+                }
+
                 CompilationInfo.MarkAsCompiled(file);
             }
 
