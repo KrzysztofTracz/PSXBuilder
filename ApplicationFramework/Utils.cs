@@ -32,18 +32,18 @@ namespace ApplicationFramework
             return result;
         }
 
-        public static FileStream CreateFile(String path)
+        public static void CreateDirectory(String path)
         {
             var split = path.Split(DirectorySeparator);
 
             if (split.Length > 1)
             {
                 var dir = new StringBuilder();
-                for (int i = 0; i < split.Length - 1; i++)
+                for (int i = 0; i < split.Length; i++)
                 {
                     var d = split[i];
                     bool createDirectory = false;
-                    if (d != "."  && 
+                    if (d != "." &&
                         d != ".." &&
                         !IsDrive(d))
                     {
@@ -63,8 +63,28 @@ namespace ApplicationFramework
                     dir.Append(DirectorySeparator);
                 }
             }
+        }
 
+        public static FileStream CreateFile(String path)
+        {
+            CreateDirectory(GetDirectory(path));
             return File.Create(path);
+        }
+
+        public static String GetDirectory(String file)
+        {
+            var result = "";
+            var split = file.Split(DirectorySeparator);
+            if(split.Length > 0)
+            {
+                var directories = new String[split.Length - 1];
+                for (int i = 0; i < directories.Length; i++)
+                {
+                    directories[i] = split[i];
+                }
+                result = Path(directories);
+            }
+            return result;
         }
 
         public static String GetFileName(String path)

@@ -141,6 +141,8 @@ namespace PSXBuildService
         protected String GetObjFile(String file)
         {
             return NamesConverter.GetShortPath(Utils.Path(IntermediateDirectory,
+                                                          Utils.ConvertPathToLocal(Utils.GetDirectory(file), 
+                                                                                   NamesConverter.GetShortPath(RootDirectory)),
                                                           Utils.FileName(Utils.GetFileNameExcludingExtension(file),
                                                                          IntermediateFileExtension)));
         } 
@@ -177,8 +179,11 @@ namespace PSXBuildService
             var outputBuffer = new StringBuilder();
             foreach (var file in CompilationInfo.Files)
             {
-                Server.SendLog("Compiling file: {0}", Utils.GetFileName(file));
-                var process = new Process("ccpsx.exe", "-c", file, "-o", GetObjFile(file));
+                var objFile = GetObjFile(file);
+                Utils.CreateDirectory(Utils.GetDirectory(objFile));
+
+                Server.SendLog("Compiling file: {0}", Utils.GetFileName(file));               
+                var process = new Process("ccpsx.exe", "-c", file, "-o", objFile);
                 returnCode = process.Run(Logger);                
                 if (returnCode != 0)
                 {
@@ -204,7 +209,8 @@ namespace PSXBuildService
             var outputBuffer = new StringBuilder();
 
             var files = System.IO.Directory.GetFiles(NamesConverter.GetShortPath(IntermediateDirectory), 
-                                                     Utils.FileName("*", IntermediateFileExtension));
+                                                     Utils.FileName("*", IntermediateFileExtension), 
+                                                     System.IO.SearchOption.AllDirectories);
 
             var controlFile = CreateControlFile(NamesConverter.GetShortName(Project), 
                                                 files);
@@ -244,7 +250,7 @@ namespace PSXBuildService
                 buffer.AppendLine(file);
             }
 
-            var path = NamesConverter.GetShortPath(Utils.Path(IntermediateDirectory, 
+            var path = NamesConverter.GetShortPath(Utils.Path(RootDirectory, 
                                                               Utils.FileName(name, 
                                                                              ControlFileExtension)));
 
