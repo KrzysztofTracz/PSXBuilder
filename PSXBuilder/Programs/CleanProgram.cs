@@ -30,8 +30,9 @@ namespace PSXBuilder
                 var user = Environment.MachineName;
                 Log("Starting clean session. User: {0}, Project: {1}.", user, project.Name);
                 var cleanSessionStartMessage = new CleanSessionStartMessage();
-                cleanSessionStartMessage.User    = user;
-                cleanSessionStartMessage.Project = project.Name;
+                cleanSessionStartMessage.User          = user;
+                cleanSessionStartMessage.Project       = project.Name;
+                cleanSessionStartMessage.Configuration = project.Configuration;
 
                 client.SendMessage(cleanSessionStartMessage);
                 client.WaitForMessage<CleanSessionFinishedMessage>();

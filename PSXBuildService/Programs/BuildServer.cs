@@ -75,6 +75,7 @@ namespace PSXBuildService.Programs
                                message.ProjectPath,
                                message.SDKPath,
                                message.Output,
+                               message.Configuration,
                                Server,
                                Application.Console);
             builder.Start();
@@ -87,6 +88,7 @@ namespace PSXBuildService.Programs
             cleaner.Initialize(message.User,
                                message.Project,
                                Application.ProjectsPath,
+                               message.Configuration,
                                Server,
                                Application.Console);
             cleaner.Start();

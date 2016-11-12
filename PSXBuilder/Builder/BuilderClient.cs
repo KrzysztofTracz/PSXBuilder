@@ -67,16 +67,17 @@ namespace PSXBuilder
             }
 
             Client.Connect();
-            Logger.Log("Starting build session. User: {0}, Project: {1}.", user, project);
+            Logger.Log("Starting build session. User: {0}, Project: {1}, Configuration: {2}", user, project, Project.Configuration);
             BuildInfo.Time = DateTime.Now;
 
             var buildSessionStartMessage = new BuildSessionStartMessage();
-            buildSessionStartMessage.User        = user;
-            buildSessionStartMessage.Project     = project;
-            buildSessionStartMessage.Output      = Utils.GetFileNameExcludingExtension(Project.OutputFileName);
-            buildSessionStartMessage.ProjectPath = Project.Directory;
-            buildSessionStartMessage.SDKPath     = SDKPath;
-            
+            buildSessionStartMessage.User          = user;
+            buildSessionStartMessage.Project       = project;
+            buildSessionStartMessage.Output        = Utils.GetFileNameExcludingExtension(Project.OutputFileName);
+            buildSessionStartMessage.ProjectPath   = Project.Directory;
+            buildSessionStartMessage.SDKPath       = SDKPath;
+            buildSessionStartMessage.Configuration = Project.Configuration;
+
             Client.SendMessage(buildSessionStartMessage);
             Client.WaitForMessage<BuildSessionStartedMessage>();
             Logger.Log("Build session started.");
@@ -99,11 +100,10 @@ namespace PSXBuilder
             bool downloadBinaries = false;
 
             Logger.Log("");
-            Logger.Log("Starting compilation.");
-            Client.SendMessage(new CompilationStartMessage(filesToCompile, Project.PreprocessorDefinitions));
-            var resultMessage = Client.WaitForMessage<CompilationResultMessage>();
-            Logger.Log(resultMessage.Output);
-            startLinker = resultMessage.ReturnCode == 0;
+
+            startLinker = StartRemoteProcess<CompilationResultMessage>(new CompilationStartMessage(filesToCompile, 
+                                                                                                   Project.PreprocessorDefinitions),
+                                                                       "Starting compilation.");
 
             if (startLinker)
             {
@@ -134,6 +134,17 @@ namespace PSXBuilder
             SaveBuildInfo();
 
             return result;
+        }
+
+        protected bool StartRemoteProcess<RESULT>(CommunicationFramework.Message message,
+                                                  String                         log)
+            where RESULT : ProcessResultMessage
+        {
+            Logger.Log(log);
+            Client.SendMessage(message);
+            var resultMessage = Client.WaitForMessage<RESULT>();
+            Logger.Log(resultMessage.Output);
+            return resultMessage.ReturnCode == 0;
         }
 
         protected bool StartRemoteProcess<INVOKE, RESULT>(String log) where INVOKE : EmptyMessage, new()

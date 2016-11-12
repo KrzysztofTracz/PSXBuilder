@@ -221,6 +221,8 @@ namespace PSXBuilder
 
         public FileDictionary Files { get; protected set; }
 
+        public String Configuration { get; protected set; }
+
         public List<String> PreprocessorDefinitions { get; protected set; }
 
         public PSXProject()
@@ -259,6 +261,8 @@ namespace PSXBuilder
 
                 Files = LoadFiles(project);
                 ProjectCollection.GlobalProjectCollection.UnloadProject(project);
+
+                Configuration = configuration;
 
                 PreprocessorDefinitions = new List<String>(project.GetPropertyValue("NMakePreprocessorDefinitions").Replace(" ", "").Split(';'));
             }           

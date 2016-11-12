@@ -15,6 +15,7 @@ namespace PSXBuildService
         public String User          { get; protected set; }
         public String Project       { get; protected set; }
         public String RootDirectory { get; protected set; }
+        public String Configuration { get; protected set; }
 
         public DOSNamesConverter NamesConverter { get; protected set; }
 
@@ -30,6 +31,7 @@ namespace PSXBuildService
         public virtual void Initialize(String user,
                                        String project,
                                        String rootDirectory,
+                                       String configuration,
                                        Server server,
                                        ILogger logger)
         {
@@ -38,7 +40,7 @@ namespace PSXBuildService
             User    = user;
             Project = project;
 
-            RootDirectory = Utils.Path(rootDirectory, User, Project);
+            RootDirectory = Utils.Path(rootDirectory, User, Project, configuration);
 
             NamesConverter = new DOSNamesConverter();
             NamesConverter.Initialize(logger);

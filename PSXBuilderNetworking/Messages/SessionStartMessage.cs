@@ -8,19 +8,22 @@ namespace PSXBuilderNetworking.Messages
 {
     public class SessionStartMessage : Message
     {
-        public String User { get; set; }
-        public String Project { get; set; }
+        public String User          { get; set; }
+        public String Project       { get; set; }
+        public String Configuration { get; set; }
 
         public SessionStartMessage()
         {
-            User    = "";
-            Project = "";
+            User          = "";
+            Project       = "";
+            Configuration = "";
         }
 
-        public SessionStartMessage(String user, String project)
+        public SessionStartMessage(String user, String project, String configuration)
         {
-            User = user;
-            Project = project;
+            User          = user;
+            Project       = project;
+            Configuration = configuration;
         }
 
         protected override void AppendData(ByteArrayWriter writer)
@@ -30,18 +33,23 @@ namespace PSXBuilderNetworking.Messages
 
             writer.Append(GetStringSize(Project));
             writer.Append(Project);
+
+            writer.Append(GetStringSize(Configuration));
+            writer.Append(Configuration);
         }
 
         protected override int GetDataSize()
         {
-            return sizeof(int) + GetStringSize(User) +
-                   sizeof(int) + GetStringSize(Project);
+            return sizeof(int) + GetStringSize(User)        +
+                   sizeof(int) + GetStringSize(Project)     +
+                   sizeof(int) + GetStringSize(Configuration);
         }
 
         protected override void ReadData(ByteArrayReader reader)
         {
-            User = reader.ReadString(reader.ReadInt());
-            Project = reader.ReadString(reader.ReadInt());
+            User          = reader.ReadString(reader.ReadInt());
+            Project       = reader.ReadString(reader.ReadInt());
+            Configuration = reader.ReadString(reader.ReadInt());
         }
     }
 }

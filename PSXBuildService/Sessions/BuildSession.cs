@@ -47,12 +47,14 @@ namespace PSXBuildService
                                String originalRootDirectory,
                                String originalSDKDirectory,
                                String output,
+                               String configuration,
                                Server server,
                                ILogger logger)
         {
             base.Initialize(user,
                             project,
                             rootDirectory,
+                            configuration,
                             server,
                             logger);
 
