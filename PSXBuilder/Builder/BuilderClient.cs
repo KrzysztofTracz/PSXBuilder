@@ -101,9 +101,10 @@ namespace PSXBuilder
 
             Logger.Log("");
 
-            startLinker = StartRemoteProcess<CompilationResultMessage>(new CompilationStartMessage(filesToCompile, 
-                                                                                                   Project.PreprocessorDefinitions),
-                                                                       "Starting compilation.");
+            startLinker = StartRemoteProcess<CompilationResultMessage>
+                                            (new CompilationStartMessage(filesToCompile, 
+                                                                         Project.PreprocessorDefinitions),
+                                            "Starting compilation.");
 
             if (startLinker)
             {
@@ -114,9 +115,9 @@ namespace PSXBuilder
 
             if(createExecutable)
             {
-                downloadBinaries = StartRemoteProcess<CreateExecutableMessage, 
-                                                      CreatingExecutableResultMessage>
-                                                     ("Creating executable.");
+                downloadBinaries = StartRemoteProcess<CreatingExecutableResultMessage>
+                                                     (new CreateExecutableMessage(Project.VideoFormat),
+                                                     "Creating executable.");
             }
 
             if (downloadBinaries)

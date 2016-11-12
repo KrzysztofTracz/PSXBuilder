@@ -293,7 +293,12 @@ namespace PSXBuildService
         protected bool OnCreateExecutableMessage(CreateExecutableMessage message)
         {
             var outputBuffer = new StringBuilder();
-            var process = new Process("cpe2x.exe", "/CE", NamesConverter.GetShortName(Utils.FileName(Utils.GetFileName(OutputFileName), 
+
+            var regionSwitch = "";
+            if (message.VideoFormat == "NTSC") regionSwitch = "/CA";
+            if (message.VideoFormat == "PAL")  regionSwitch = "/CE";
+
+            var process = new Process("cpe2x.exe", regionSwitch, NamesConverter.GetShortName(Utils.FileName(Utils.GetFileName(OutputFileName), 
                                                                                                      BinaryFileExtension)));
             var returnCode = process.Run(Logger, true, NamesConverter.GetShortPath(OutputDirectory));
             if (returnCode != 0)

@@ -222,6 +222,7 @@ namespace PSXBuilder
         public FileDictionary Files { get; protected set; }
 
         public String Configuration { get; protected set; }
+        public String VideoFormat   { get; protected set; }
 
         public List<String> PreprocessorDefinitions { get; protected set; }
 
@@ -265,6 +266,15 @@ namespace PSXBuilder
                 Configuration = configuration;
 
                 PreprocessorDefinitions = new List<String>(project.GetPropertyValue("NMakePreprocessorDefinitions").Replace(" ", "").Split(';'));
+
+                if(PreprocessorDefinitions.Contains("_NTSC"))
+                {
+                    VideoFormat = "NTSC";
+                }
+                else if (PreprocessorDefinitions.Contains("_PAL"))
+                {
+                    VideoFormat = "PAL";
+                }
             }           
 
             return result;
