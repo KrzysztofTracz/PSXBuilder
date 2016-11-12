@@ -46,7 +46,6 @@
     <Compile Include="Messages\CleanSessionStartMessage.cs" />
     <Compile Include="Messages\CompilationResultMessage.cs" />
     <Compile Include="Messages\CompilationStartMessage.cs" />
-    <Compile Include="Messages\CompileFilesMessage.cs" />
     <Compile Include="Messages\CreateExecutableMessage.cs" />
     <Compile Include="Messages\CreatingExecutableResultMessage.cs" />
     <Compile Include="Messages\DownloadProjectBinariesMessage.cs" />

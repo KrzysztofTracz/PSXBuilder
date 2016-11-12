@@ -102,7 +102,6 @@ namespace PSXBuildService
         {
             Server.RegisterDelegate<RemoveFilesMessage>(OnRemoveFilesMessage);
             Server.RegisterDelegate<ProjectFileUploadMessage>(OnProjectFileUploadMessage);
-            Server.RegisterDelegate<CompileFilesMessage>(OnCompileFilesMessage);
             Server.RegisterDelegate<CompilationStartMessage>(OnCompilationStartMessage);
             Server.RegisterDelegate<LinkingProcessStartMessage>(OnLinkingProcessStartMessage);
             Server.RegisterDelegate<CreateExecutableMessage>(OnCreateExecutableMessage);
@@ -113,7 +112,6 @@ namespace PSXBuildService
         {
             Server.UnregisterDelegate<RemoveFilesMessage>();
             Server.UnregisterDelegate<ProjectFileUploadMessage>();
-            Server.UnregisterDelegate<CompileFilesMessage>();
             Server.UnregisterDelegate<CompilationStartMessage>();
             Server.UnregisterDelegate<LinkingProcessStartMessage>();
             Server.UnregisterDelegate<CreateExecutableMessage>();
@@ -130,19 +128,6 @@ namespace PSXBuildService
                 CompilationInfo.Remove(convertedFileName);
                 DeleteFile(convertedFileName);
                 RemoveObjFile(convertedFileName);
-            }
-
-            return true;
-        }
-
-        protected bool OnCompileFilesMessage(CompileFilesMessage message)
-        {
-            var files = message.Files;
-
-            foreach (var file in files)
-            {
-                var convertedFileName = NamesConverter.GetShortPath(GetFullPath(file));
-                CompilationInfo.Add(convertedFileName);
             }
 
             return true;
@@ -187,13 +172,25 @@ namespace PSXBuildService
         {
             var returnCode = 0;
             var outputBuffer = new StringBuilder();
+
+            var files = message.Files;
+
+            foreach (var file in files)
+            {
+                var convertedFileName = NamesConverter.GetShortPath(GetFullPath(file));
+                CompilationInfo.Add(convertedFileName);
+            }
+            CompilationInfo.Save();
+
+            var preprocessorDefinitions = GetPreprocessorDefinitions(message.PreprocessorDefinitions);
+
             foreach (var file in CompilationInfo.Files)
             {
                 var objFile = GetObjFile(file);
                 Utils.CreateDirectory(Utils.GetDirectory(objFile));
 
                 Server.SendLog("Compiling file: {0}", Utils.GetFileName(file));               
-                var process = new Process("ccpsx.exe", "-c", file, "-o", objFile);
+                var process = new Process("ccpsx.exe", "-c", file, "-o", objFile, preprocessorDefinitions);
                 returnCode = process.Run(Logger);
 
                 var compilationMessage = MessageConverter.ConvertMessage(process.Output);
@@ -219,6 +216,20 @@ namespace PSXBuildService
 
             Server.SendMessage(resultMessage);
             return true;
+        }
+
+        protected String GetPreprocessorDefinitions(List<String> definitions)
+        {
+            var buffer = new StringBuilder();
+
+            foreach(var definition in definitions)
+            {
+                buffer.Append("-D");
+                buffer.Append(definition);
+                buffer.Append(" ");
+            }
+
+            return buffer.ToString();
         }
 
         protected bool OnLinkingProcessStartMessage(LinkingProcessStartMessage message)

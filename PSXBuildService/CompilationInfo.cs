@@ -49,7 +49,6 @@ namespace PSXBuildService
             if (!Files.Contains(file))
             {
                 Files.Add(file);
-                Flush();
             }
         }
 

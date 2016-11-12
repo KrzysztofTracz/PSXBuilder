@@ -94,17 +94,17 @@ namespace PSXBuilder
                 Client.SendMessage(fileUploadMessage);
             }
 
-            Client.SendMessage(new CompileFilesMessage(filesToCompile));
-
             bool startLinker      = false;
             bool createExecutable = false;
             bool downloadBinaries = false;
 
             Logger.Log("");
+            Logger.Log("Starting compilation.");
+            Client.SendMessage(new CompilationStartMessage(filesToCompile, Project.PreprocessorDefinitions));
+            var resultMessage = Client.WaitForMessage<CompilationResultMessage>();
+            Logger.Log(resultMessage.Output);
+            startLinker = resultMessage.ReturnCode == 0;
 
-            startLinker = StartRemoteProcess<CompilationStartMessage, 
-                                             CompilationResultMessage>
-                                            ("Starting compilation.");
             if (startLinker)
             {
                 createExecutable = StartRemoteProcess<LinkingProcessStartMessage, 
