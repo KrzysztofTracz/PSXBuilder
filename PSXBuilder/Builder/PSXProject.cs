@@ -221,8 +221,9 @@ namespace PSXBuilder
 
         public FileDictionary Files { get; protected set; }
 
-        public String Configuration { get; protected set; }
-        public String VideoFormat   { get; protected set; }
+        public String Configuration     { get; protected set; }
+        public String VideoFormat       { get; protected set; }
+        public int    OptimisationLevel { get; protected set; }
 
         public List<String> PreprocessorDefinitions { get; protected set; }
 
@@ -267,7 +268,7 @@ namespace PSXBuilder
 
                 PreprocessorDefinitions = new List<String>(project.GetPropertyValue("NMakePreprocessorDefinitions").Replace(" ", "").Split(';'));
 
-                if(PreprocessorDefinitions.Contains("_NTSC"))
+                if (PreprocessorDefinitions.Contains("_NTSC"))
                 {
                     VideoFormat = "NTSC";
                 }
@@ -275,6 +276,8 @@ namespace PSXBuilder
                 {
                     VideoFormat = "PAL";
                 }
+
+                OptimisationLevel = PreprocessorDefinitions.Contains("_DEBUG") ? 0 : 2;
             }           
 
             return result;

@@ -10,18 +10,22 @@ namespace PSXBuilderNetworking.Messages
     public class CompilationStartMessage : FileListMessage
     {
         public List<String> PreprocessorDefinitions { get; set; }
+        public int          OptimisationLevel       { get; set; }
 
         public CompilationStartMessage()
             : base()
         {
             PreprocessorDefinitions = new List<String>();
+            OptimisationLevel       = 0;
         }
 
         public CompilationStartMessage(List<String> files, 
-                                       List<String> preprocessorDefinitions)
+                                       List<String> preprocessorDefinitions,
+                                       int          optimisationLevel)
             : base(files)
         {
             PreprocessorDefinitions = preprocessorDefinitions;
+            OptimisationLevel       = optimisationLevel;
         }
 
         protected override void AppendData(ByteArrayWriter arrayWriter)
@@ -32,6 +36,7 @@ namespace PSXBuilderNetworking.Messages
                 arrayWriter.Append(GetStringSize(preprocessorDefinition));
                 arrayWriter.Append(preprocessorDefinition);
             }
+            arrayWriter.Append(OptimisationLevel);
             base.AppendData(arrayWriter);
         }
 
@@ -42,6 +47,7 @@ namespace PSXBuilderNetworking.Messages
             {
                 result += sizeof(int) + GetStringSize(preprocessorDefinition);
             }
+            result += sizeof(int);
             return result + base.GetDataSize();
         }
 
@@ -52,6 +58,7 @@ namespace PSXBuilderNetworking.Messages
             {
                 PreprocessorDefinitions.Add(arrayReader.ReadString(arrayReader.ReadInt()));
             }
+            OptimisationLevel = arrayReader.ReadInt();
             base.ReadData(arrayReader);
         }
     }

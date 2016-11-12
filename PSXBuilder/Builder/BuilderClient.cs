@@ -103,7 +103,8 @@ namespace PSXBuilder
 
             startLinker = StartRemoteProcess<CompilationResultMessage>
                                             (new CompilationStartMessage(filesToCompile, 
-                                                                         Project.PreprocessorDefinitions),
+                                                                         Project.PreprocessorDefinitions,
+                                                                         Project.OptimisationLevel),
                                             "Starting compilation.");
 
             if (startLinker)

@@ -185,6 +185,7 @@ namespace PSXBuildService
             CompilationInfo.Save();
 
             var preprocessorDefinitions = GetPreprocessorDefinitions(message.PreprocessorDefinitions);
+            var optimisationLevel = String.Format("-O{0}", message.OptimisationLevel);
 
             foreach (var file in CompilationInfo.Files)
             {
@@ -192,7 +193,7 @@ namespace PSXBuildService
                 Utils.CreateDirectory(Utils.GetDirectory(objFile));
 
                 Server.SendLog("Compiling file: {0}", Utils.GetFileName(file));               
-                var process = new Process("ccpsx.exe", "-c", file, "-o", objFile, preprocessorDefinitions);
+                var process = new Process("ccpsx.exe", "-c", file, "-o", objFile, optimisationLevel, preprocessorDefinitions);
                 returnCode = process.Run(Logger);
 
                 var compilationMessage = MessageConverter.ConvertMessage(process.Output);
