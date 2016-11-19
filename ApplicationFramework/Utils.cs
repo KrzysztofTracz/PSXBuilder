@@ -175,6 +175,16 @@ namespace ApplicationFramework
             return String.Format("\"{0}\"", text);
         }
 
+        public static String Text(params String[] text)
+        {
+            var buffer = new StringBuilder();
+            foreach(var t in text)
+            {
+                buffer.Append(t);
+            }
+            return buffer.ToString();
+        }
+
         public static String TrimComments(String text)
         {
             var buffer     = new StringBuilder();

@@ -68,6 +68,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Programs\CreateProjectProgram.cs" />
     <Compile Include="Programs\ExecuteProgram.cs" />
+    <Compile Include="Programs\ProjectProgram.cs" />
     <Compile Include="Programs\RebuildProgram.cs" />
     <Compile Include="Programs\SDKInstallationProgram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

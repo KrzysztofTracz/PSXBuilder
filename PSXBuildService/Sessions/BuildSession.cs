@@ -227,9 +227,12 @@ namespace PSXBuildService
 
             foreach(var definition in definitions)
             {
-                buffer.Append("-D");
-                buffer.Append(definition);
-                buffer.Append(" ");
+                if (!String.IsNullOrEmpty(definition))
+                {
+                    buffer.Append("-D");
+                    buffer.Append(definition);
+                    buffer.Append(" ");
+                }
             }
 
             return buffer.ToString();

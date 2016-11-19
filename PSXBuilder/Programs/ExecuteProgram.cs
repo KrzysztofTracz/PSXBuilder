@@ -8,31 +8,29 @@ namespace PSXBuilder.Programs
 {
     class ExecuteProgram : ApplicationFramework.Program<PSXBuilder>
     {
-        public override bool Start(params String[] arguments)
+        [ProgramArgument]
+        public String Exe = null;
+
+        public override bool Start()
         {
             var process = new Process(Utils.Quotes(Application.EPSXEPath), 
                                       "-nogui", 
                                       "-bios", 
-                                      Utils.Quotes(Application.EPSXEBios), Utils.Quotes(arguments[0]));
+                                      Utils.Quotes(Application.EPSXEBios), Utils.Quotes(Exe));
 
             process.Run(Application.Console, false);
 
             return true;
         }
 
-        protected override String[] GetArguments()
-        {
-            return new[] { "psx.exe" };
-        }
-
         protected override String GetDescription()
         {
-            return "run psx executable";
+            return "Run psx executable";
         }
 
         protected override String GetSpecifier()
         {
-            return "-e";
+            return "e";
         }
     }
 }

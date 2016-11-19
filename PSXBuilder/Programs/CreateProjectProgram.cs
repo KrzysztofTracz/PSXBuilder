@@ -15,12 +15,18 @@ namespace PSXBuilder.Programs
         public const String FiltersExtension      = ProjectFileExtension + ".filters";
         public const String UserFileExtension     = ProjectFileExtension + ".user";
 
-        public override bool Start(params string[] arguments)
+        [ProgramArgument]
+        public String Target = null;
+
+        [ProgramArgument(Optional=true)]
+        public String Source = null;
+        
+        public override bool Start()
         {
             bool result = false;
 
-            var sourceDirectory = arguments[0];
-            var targetDirectory = arguments[1];
+            var sourceDirectory = Source;
+            var targetDirectory = Target;
 
             var files = new List<String>();
 
@@ -54,19 +60,14 @@ namespace PSXBuilder.Programs
             }
         }
 
-        protected override String[] GetArguments()
-        {
-            return new[] { "sourceDirectory", "targetDirectory" };
-        }
-
         protected override String GetDescription()
         {
-            return "create new project";
+            return "Create new project";
         }
 
         protected override String GetSpecifier()
         {
-            return "-n";
+            return "n";
         }
     }
 }

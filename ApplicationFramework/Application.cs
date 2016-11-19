@@ -61,11 +61,8 @@ namespace ApplicationFramework
                 {
                     if(program.Specifier == specifier)
                     {
-                        if(program.Arguments.Length == arguments.Length - 1)
-                        {
-                            displayHelp = false;
-                            result = program.Start(GetProgramArguments(arguments));
-                        }
+                        result      = program.Start(GetProgramArguments(arguments));
+                        displayHelp = false;
                         break;
                     }
                 }
@@ -85,20 +82,20 @@ namespace ApplicationFramework
 
         public void DisplayHelp()
         {
+            Console.WriteLine("Usage:");
             Console.PushTab();
+            Console.WriteLine("{0} /? /argument /argument=value /argument=value0,value1,value2", Name);
+            Console.WriteLine();
+            Console.PopTab();
 
+            Console.WriteLine("Options:");
+            Console.PushTab();
             var programs = Programs.Values;
             foreach (var program in programs)
             {
-                Console.WriteLine("{0}\t{1}", program.Specifier, 
-                                              Utils.ConcatArguments(" ", program.Arguments));
-                Console.PushTab();
-                Console.WriteLine(program.Description);
-                Console.PopTab();
-
+                program.DisplayHelp();
                 Console.WriteLine();
             }
-
             Console.PopTab();
         }
 
@@ -137,11 +134,23 @@ namespace ApplicationFramework
 
             foreach (var type in types)
             {
-                if(type.IsClass && type.IsSubclassOf(typeof(IProgram)))
+                if(type.IsClass && type.IsSubclassOf(typeof(IProgram)) && !type.IsAbstract)
                 {
-                    var genericArguments = type.BaseType.GetGenericArguments();
-                    if (genericArguments.Contains(this.GetType()) ||
-                        genericArguments.Contains(typeof(Application)))
+                    var baseType = type;
+                    bool applicationCheck = false;
+                    do
+                    {
+                        baseType = baseType.BaseType;
+                        var genericArguments = baseType.GetGenericArguments();
+                        if (genericArguments.Contains(this.GetType()) ||
+                            genericArguments.Contains(typeof(Application)))
+                        {
+                            applicationCheck = true;
+                        }
+                    }
+                    while (!applicationCheck && baseType != typeof(IProgram));
+
+                    if (applicationCheck)
                     {
                         if (!Programs.ContainsKey(type))
                         {
@@ -152,7 +161,7 @@ namespace ApplicationFramework
                             Programs.Add(type, program);
 
                             if(String.IsNullOrEmpty(program.Specifier) && 
-                               program.Arguments.Length == 0)
+                               program.ArgumentsCount == 0)
                             {
                                 DefaultProgram = program;
                             }

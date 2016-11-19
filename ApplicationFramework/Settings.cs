@@ -165,6 +165,11 @@ namespace ApplicationFramework
             return result;
         }
 
+        public bool Contains(String name)
+        {
+            return fields.ContainsKey(name);
+        }
+
         public String GetValue(String name)
         {
             String result = null;
@@ -182,6 +187,17 @@ namespace ApplicationFramework
             if (!String.IsNullOrEmpty(name) && fields.ContainsKey(name))
             {
                 result = fields[name].GetValue(settingsOwner);
+            }
+            return result;
+        }
+
+        public String GetDefaultValue(int index)
+        {
+            String result = null;
+            var name = GetName(index);
+            if (!String.IsNullOrEmpty(name) && fields.ContainsKey(name))
+            {
+                result = fields[name].DefaultValue;
             }
             return result;
         }

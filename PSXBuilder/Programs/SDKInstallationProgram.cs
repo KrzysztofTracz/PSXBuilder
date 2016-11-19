@@ -11,7 +11,7 @@ namespace PSXBuilder.Programs
 {
     class SDKInstallationProgram : Program<PSXBuilder>
     {
-        public override bool Start(params String[] arguments)
+        public override bool Start()
         {
             var client = new PSXBuilderNetworking.Client();
             client.Inititalize(Application.NetworkingSystem.GetConnectionAddress(),
@@ -68,19 +68,14 @@ namespace PSXBuilder.Programs
             return true;
         }
 
-        protected override String[] GetArguments()
-        {
-            return new String[0];
-        }
-
         protected override String GetDescription()
         {
-            return "sdk installation on building machine";
+            return "Sdk installation on building machine";
         }
 
         protected override string GetSpecifier()
         {
-            return "-i";
+            return "i";
         }
     }
 }

@@ -5,14 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CommunicationFramework.Messages;
+using ApplicationFramework;
 
 namespace PSXBuildService.Programs
 {
-    class BuildServer : ApplicationFramework.Program<PSXBuildService>
+    class BuildServer : Program<PSXBuildService>
     {
         public Server Server { get; protected set; }
 
-        public override bool Start(params String[] arguments)
+        public override bool Start()
         {
             bool result = true;
 
@@ -38,11 +39,6 @@ namespace PSXBuildService.Programs
             }
 
             return result;
-        }
-
-        protected override String[] GetArguments()
-        {
-            return new String[0];
         }
 
         protected override String GetDescription()

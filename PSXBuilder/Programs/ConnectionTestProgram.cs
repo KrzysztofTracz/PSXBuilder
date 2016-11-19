@@ -9,7 +9,7 @@ namespace PSXBuilder
 {
     class ConnectionTestProgram : Program<PSXBuilder>
     {
-        public override bool Start(params String[] arguments)
+        public override bool Start()
         {
             bool result = false;
 
@@ -25,19 +25,14 @@ namespace PSXBuilder
             return result;
         }
 
-        protected override String[] GetArguments()
-        {
-            return new String[] { };
-        }
-
         protected override String GetDescription()
         {
-            return "build machine connection test";
+            return "Build machine connection test";
         }
 
         protected override String GetSpecifier()
         {
-            return "-t";
+            return "t";
         }
     }
 }

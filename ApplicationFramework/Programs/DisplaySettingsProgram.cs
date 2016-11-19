@@ -8,7 +8,7 @@ namespace ApplicationFramework
 {
     class DisplaySettingsProgram : Program<Application>
     {
-        public override bool Start(params String[] arguments)
+        public override bool Start()
         {
             Application.Console.PushTab();
             for (int i = 0; i < Application.Settings.Count; i++)
@@ -22,19 +22,14 @@ namespace ApplicationFramework
             return true;
         }
 
-        protected override String[] GetArguments()
-        {
-            return new String[] { };
-        }
-
         protected override String GetDescription()
         {
-            return "display settings";
+            return "Display settings";
         }
 
         protected override String GetSpecifier()
         {
-            return "-d";
+            return "d";
         }
     }
 }

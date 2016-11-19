@@ -268,13 +268,13 @@ namespace PSXBuilder
 
                 PreprocessorDefinitions = new List<String>(project.GetPropertyValue("NMakePreprocessorDefinitions").Replace(" ", "").Split(';'));
 
-                if (PreprocessorDefinitions.Contains("_NTSC"))
-                {
-                    VideoFormat = "NTSC";
-                }
-                else if (PreprocessorDefinitions.Contains("_PAL"))
+                if (PreprocessorDefinitions.Contains("_PAL"))
                 {
                     VideoFormat = "PAL";
+                }
+                else
+                {
+                    VideoFormat = "NTSC";
                 }
 
                 OptimisationLevel = PreprocessorDefinitions.Contains("_DEBUG") ? 0 : 2;

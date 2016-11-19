@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ApplicationFramework;
 
 namespace PSXBuilder
 {
-    class RebuildProgram : ApplicationFramework.Program<PSXBuilder>
+    class RebuildProgram : ProjectProgram
     {
         public override bool Start(params String[] arguments)
         {
@@ -19,19 +20,19 @@ namespace PSXBuilder
             return result;
         }
 
-        protected override String[] GetArguments()
+        public override bool Start()
         {
-            return new[] { "projectFile", "configuration", "toolsVersion" };
+            return false;
         }
 
         protected override String GetDescription()
         {
-            return "rebuild project";
+            return "Rebuild project";
         }
 
         protected override String GetSpecifier()
         {
-            return "-r";
+            return "r";
         }
     }
 }

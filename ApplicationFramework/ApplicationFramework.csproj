@@ -45,6 +45,7 @@
     <Compile Include="Logger.cs" />
     <Compile Include="Process.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="ProgramArgument.cs" />
     <Compile Include="Programs\DisplaySettingsProgram.cs" />
     <Compile Include="Programs\SetupProgram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

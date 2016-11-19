@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ApplicationFramework;
 
 namespace PSXBuilder
 {
-    class BuildProgram : ApplicationFramework.Program<PSXBuilder>
+    class BuildProgram : ProjectProgram
     {
-        public override bool Start(params String[] arguments)
+        public override bool Start()
         {
             bool result = false;
 
             var project = new PSXProject();
-            if (project.Load(arguments[0], arguments[1], arguments[2]))
+            if (project.Load(Project, Configuration, Tools))
             {
                 var builder = new BuilderClient();
                 builder.Initialize(project, 
@@ -26,19 +27,14 @@ namespace PSXBuilder
             return result;
         }
 
-        protected override String[] GetArguments()
-        {
-            return new[] { "projectFile", "configuration", "toolsVersion" };
-        }
-
         protected override String GetDescription()
         {
-            return "build project";
+            return "Build project";
         }
 
         protected override String GetSpecifier()
         {
-            return "-b";
+            return "b";
         }
     }
 }

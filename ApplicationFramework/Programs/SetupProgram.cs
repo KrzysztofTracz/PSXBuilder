@@ -10,41 +10,89 @@ namespace ApplicationFramework
     {
         public override bool Start(params String[] arguments)
         {
-            bool result = false;
+            bool result = true;
 
-            if (arguments.Length == Application.Settings.Count)
+            foreach(var argument in arguments)
             {
-                for (int i = 0; i < Application.Settings.Count; i++)
+                String settingsName;
+                String settingsValue;
+
+                bool isArgumentValid = false;
+                if (ParseArgument(argument, out settingsName, out settingsValue))
                 {
-                    Application.Settings[i] = arguments[i];
+                    if (Application.Settings.Contains(settingsName))
+                    {
+                        Application.Settings.SetValue(settingsName, settingsValue);
+                        isArgumentValid = true;
+                    }
                 }
-                Application.Settings.Save();
-                result = true;
+
+                if (!isArgumentValid)
+                {
+                    Log("Invalid argument {0}.", argument);
+                    DisplayHelp();
+                    result = false;
+                    break;
+                }
             }
+
+            if(result) Application.Settings.Save();
 
             return result;
         }
 
-        protected override String[] GetArguments()
+        public override bool Start()
         {
-            var arguments = new String[Application.Settings.Count];
+            return false;
+        }
 
-            for (int i = 0; i < Application.Settings.Count; i++)
+        protected bool ParseArgument(String argument, out String name, out String value)
+        {
+            var result = false;
+            name  = null;
+            value = null;
+
+            argument = argument.Substring(1);
+            var nameEndIndex = argument.IndexOf('=');
+            if(nameEndIndex > 0 && nameEndIndex + 1 < argument.Length)
             {
-                arguments[i] = Application.Settings.GetName(i);
+                name   = argument.Substring(0, nameEndIndex);
+                value  = argument.Substring(nameEndIndex + 1);
+                result = true;
             }
 
-            return arguments;
+            return result; 
+        }
+
+        protected override String[] GetArguments()
+        {
+            var result = new String[Application.Settings.Count];
+            
+            for (int i = 0; i < Application.Settings.Count; i++)
+            {
+                var buffer = new StringBuilder();
+                buffer.Append("? ");
+                buffer.Append(ProgramArgument.Prefix);
+                buffer.Append(Application.Settings.GetName(i));
+                var defaultValue = Application.Settings.GetDefaultValue(i);
+                if (!String.IsNullOrEmpty(defaultValue))
+                {
+                    buffer.Append('=');
+                    buffer.Append(Utils.Quotes(Application.Settings.GetDefaultValue(i)));
+                }
+                result[i] = buffer.ToString();
+            }
+            return result;
         }
 
         protected override String GetDescription()
         {
-            return "setup settings";
+            return "Application setup";
         }
 
         protected override String GetSpecifier()
         {
-            return "-s";
+            return "s";
         }
     }
 }
