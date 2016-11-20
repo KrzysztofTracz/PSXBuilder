@@ -9,43 +9,73 @@ namespace PSXBuilder.Programs
 {
     class CreateProjectProgram : Program<PSXBuilder>
     {
-        public const String SourceDirectory       = "Source";
-        public const String SolutionFileExtension = "sln";
-        public const String ProjectFileExtension  = "vcproj";
-        public const String FiltersExtension      = ProjectFileExtension + ".filters";
-        public const String UserFileExtension     = ProjectFileExtension + ".user";
-
+        public const String SourceDirectoryName   = "Source";
+        
+        
         [ProgramArgument]
-        public String Target = null;
+        public String TargetDirectory = null;
 
         [ProgramArgument(Optional=true)]
-        public String Source = null;
-        
+        public String SourceDirectory = null;
+
+        [ProgramArgument(Optional = true)]
+        public String ProjectName = null;
+
+        [ProgramArgument(Optional = true)]
+        public String WindowsTargetPlatformVersion = "8.1";
+
         public override bool Start()
         {
             bool result = false;
 
-            var sourceDirectory = Source;
-            var targetDirectory = Target;
+            var includeFiles = new List<String>();
+            var compileFiles = new List<String>();
 
-            var files = new List<String>();
+            if (!String.IsNullOrEmpty(SourceDirectory))
+            {
+                EnumerateFiles(SourceDirectory, "*.h", includeFiles);
+                EnumerateFiles(SourceDirectory, "*.c", compileFiles);
+            }
 
-            EnumerateFiles(sourceDirectory, "*.h", files);
-            EnumerateFiles(sourceDirectory, "*.c", files);
+            if (String.IsNullOrEmpty(ProjectName))
+            {
+                ProjectName = Utils.GetFileName(SourceDirectory);
+            }
 
-            var projectName = Utils.GetFileName(sourceDirectory);
+            var solutionDirectory    = Utils.Path(TargetDirectory,   ProjectName);
+            var projectDirectory     = Utils.Path(solutionDirectory, ProjectName);
+            var sourceFilesDirectory = Utils.Path(projectDirectory,  SourceDirectoryName);
 
-            var solutionDirectory    = Utils.Path(targetDirectory,   projectName);
-            var projectDirectory     = Utils.Path(solutionDirectory, projectName);
-            var sourceFilesDirectory = Utils.Path(projectDirectory,  SourceDirectory);
+            Utils.CreateDirectory(solutionDirectory);
+            Utils.CreateDirectory(projectDirectory);
+            Utils.CreateDirectory(sourceFilesDirectory);
 
+            CopyFiles(includeFiles, sourceFilesDirectory, projectDirectory);
+            CopyFiles(compileFiles, sourceFilesDirectory, projectDirectory);
 
+            var projectGenerator = new PSXProjectGenerator(Application);
+            projectGenerator.ProjectName                  = ProjectName;
+            projectGenerator.ProjectDirectory             = projectDirectory;
+            projectGenerator.SolutionDirectory            = solutionDirectory;
+            projectGenerator.WindowsTargetPlatformVersion = WindowsTargetPlatformVersion;
+            projectGenerator.ClIncludeFiles               = includeFiles;
+            projectGenerator.ClCompileFiles               = compileFiles;
 
-            //Utils.CreateDirectory(solutionDirectory);
-            //Utils.CreateDirectory(Utils.Path(targetDirectory, projectName, ));
-
+            projectGenerator.CreateProject();
+            projectGenerator.CreateUserFile();
+            projectGenerator.CreateSolution();
 
             return result;
+        }
+
+        protected void CopyFiles(List<String> files, String sourceFilesDirectory, String projectDirectory)
+        {
+            for (int i = 0; i < files.Count; i++)
+            {
+                var targetPath = Utils.Path(sourceFilesDirectory, Utils.ConvertPathToLocal(files[i], SourceDirectory));
+                File.WriteAllBytes(targetPath, File.ReadAllBytes(files[i]));
+                files[i] = Utils.ConvertPathToLocal(targetPath, projectDirectory);
+            }
         }
 
         protected void EnumerateFiles(String directory, String pattern, List<String> files)

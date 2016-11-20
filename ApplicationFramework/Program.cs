@@ -28,6 +28,11 @@ namespace ApplicationFramework
             }
         }
         
+        public ProgramArgument GetArgument(int index)
+        {
+            return Arguments[index];
+        }
+
         protected abstract String GetSpecifier();
         protected abstract String GetDescription();
         protected abstract void   Log(String format, params object[] objects);

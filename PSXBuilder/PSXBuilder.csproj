@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Builder\BuilderClient.cs" />
     <Compile Include="Builder\BuildInfo.cs" />
+    <Compile Include="Builder\PSXProjectGenerator.cs" />
     <Compile Include="Programs\BuildProgram.cs" />
     <Compile Include="Programs\CleanProgram.cs" />
     <Compile Include="Programs\ConnectionTestProgram.cs" />
