@@ -284,7 +284,7 @@ namespace PSXBuilder
                     xmlWriter.WriteAttributeString("Condition", String.Format("'$(Configuration)|$(Platform)'=='{0}|{1}'", configuration, Platform));
 
                     xmlWriter.WriteElementString("LocalDebuggerCommand", "$(PSX_BUILDER)");
-                    xmlWriter.WriteElementString("LocalDebuggerCommandArguments", "-e \"$(TargetPath)\"");
+                    xmlWriter.WriteElementString("LocalDebuggerCommandArguments", "/e /Exe=\"$(TargetPath)\"");
                     xmlWriter.WriteElementString("DebuggerFlavor", "WindowsLocalDebugger");
 
                     xmlWriter.WriteEndElement();

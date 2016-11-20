@@ -9,7 +9,7 @@ namespace PSXBuilder.Programs
     class ExecuteProgram : ApplicationFramework.Program<PSXBuilder>
     {
         [ProgramArgument]
-        public String Exe = null;
+        public String Exe = "$(TargetPath)";
 
         public override bool Start()
         {

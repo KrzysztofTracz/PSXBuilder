@@ -261,7 +261,7 @@ namespace PSXBuildService
                                                          Utils.FileName(outputFileName, SymbolFileExtension),
                                                          Utils.FileName(outputFileName, MapFileExtension));
 
-            var process = new Process("ccpsx.exe", "-Xo$80010000", controlFile, "-o", outputFiles);
+            var process = new Process("ccpsx.exe", "-Xo$80010000", controlFile, "-llibpress.lib", "-o", outputFiles);
             returnCode = process.Run(Logger);
             if (returnCode != 0)
             {

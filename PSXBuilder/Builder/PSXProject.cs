@@ -293,7 +293,7 @@ namespace PSXBuilder
             File result = null;
             foreach (var file in Files)
             {
-                if (file.LocalPath == localPath)
+                if (file.LocalPath.ToUpper() == localPath.ToUpper())
                 {
                     result = file;
                     break;
