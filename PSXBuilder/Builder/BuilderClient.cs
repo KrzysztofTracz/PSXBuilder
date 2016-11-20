@@ -56,6 +56,8 @@ namespace PSXBuilder
             var user    = Environment.MachineName;
             var project = Project.Name;
 
+            Utils.CreateDirectory(Project.IntermediateDir);
+
             PrepareFiles(out filesToUpload, out filesToRemove, out filesToCompile);
 
             if (filesToUpload.Count  == 0 && 
